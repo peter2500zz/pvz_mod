@@ -1,0 +1,13 @@
+[package]
+name = "pvz_mod"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = "1.0.100"
+minhook = "0.8.0"
+widestring = "1.2.1"
+windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_System_SystemServices", "Win32_UI_WindowsAndMessaging"] }
