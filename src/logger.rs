@@ -13,7 +13,8 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
         .debug(Color::BrightBlue)
         .trace(Color::BrightMagenta);
 
-    Dispatch::new()
+    // 带颜色的终端输出
+    let stdout_dispatch = Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
                 "<{}/{}> {}",
@@ -22,11 +23,27 @@ pub fn setup_logger() -> Result<(), fern::InitError> {
                 message
             ))
         })
-        // .level(log::LevelFilter::Off)
+        .chain(std::io::stdout());
+
+    // 不带颜色的文件输出
+    let file_dispatch = Dispatch::new()
+        .format(|out, message, record| {
+            out.finish(format_args!(
+                "<{}/{}> {}",
+                record.target(),
+                record.level(),
+                message
+            ))
+        })
+        .chain(fern::log_file(LOG_PATH)?);
+
+    // 合并两个 dispatch
+    Dispatch::new()
         .level(tracing::log::LevelFilter::Trace)
         .level_for("minhook", tracing::log::LevelFilter::Off)
-        .chain(std::io::stdout())
-        .chain(fern::log_file(LOG_PATH)?)
+        .chain(stdout_dispatch)
+        .chain(file_dispatch)
         .apply()?;
+
     Ok(())
 }

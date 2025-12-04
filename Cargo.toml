@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 anyhow = "1.0.100"
 fern = { version = "0.7.1", features = ["colored"] }
+inventory = "0.3.21"
 minhook = { path = "D:\\Files\\Rust\\minhook" }
 tracing = "0.1.43"
 widestring = "1.2.1"

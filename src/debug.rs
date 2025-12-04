@@ -1,7 +1,5 @@
 use anyhow::Result;
-use windows::Win32::{
-    System::Console::AllocConsole
-};
+use windows::Win32::System::Console::AllocConsole;
 
 pub fn alloc_console() -> Result<()> {
     unsafe {

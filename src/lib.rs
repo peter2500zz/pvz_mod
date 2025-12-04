@@ -1,15 +1,13 @@
-mod utils;
 mod debug;
 mod hook;
 mod logger;
 #[allow(non_snake_case)]
 mod pvz;
+mod utils;
 
 use anyhow::Result;
 use std::ffi::c_void;
-use tracing::{
-    error,
-};
+use tracing::error;
 use windows::{
     Win32::{
         Foundation::HINSTANCE,
