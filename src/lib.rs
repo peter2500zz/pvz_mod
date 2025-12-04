@@ -1,41 +1,57 @@
+mod debug;
+mod hook;
+mod logger;
+mod pvz;
+
+use anyhow::Result;
 use std::ffi::c_void;
+use tracing::{
+    error,
+};
 use windows::{
     Win32::{
-        Foundation::HINSTANCE, 
+        Foundation::HINSTANCE,
         System::SystemServices::{
-            DLL_PROCESS_ATTACH, 
-            DLL_PROCESS_DETACH, 
-            DLL_THREAD_ATTACH, 
-            DLL_THREAD_DETACH
-        }
-    }, 
-    core::BOOL
+            DLL_PROCESS_ATTACH, DLL_PROCESS_DETACH, DLL_THREAD_ATTACH, DLL_THREAD_DETACH,
+        },
+    },
+    core::BOOL,
 };
+use windows_wrapper::mb;
 
+use crate::{debug::alloc_console, hook::init_hooks, logger::setup_logger};
 
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]
-pub extern "system" fn DllMain(hinstDLL: HINSTANCE, fdwReason: u32, lpReserved: *mut c_void) -> BOOL {
+pub extern "system" fn DllMain(
+    hinstDLL: HINSTANCE,
+    fdwReason: u32,
+    lpReserved: *mut c_void,
+) -> BOOL {
     // just satisfy clippy
-    let _ = hinstDLL;
     let _ = lpReserved;
 
-    match fdwReason {
-        DLL_PROCESS_ATTACH => {
-            
-        },
-        DLL_PROCESS_DETACH => {
+    let result = match fdwReason {
+        DLL_PROCESS_ATTACH => on_pocess_attach(hinstDLL).is_ok(),
+        DLL_PROCESS_DETACH => true,
+        DLL_THREAD_ATTACH => true,
+        DLL_THREAD_DETACH => true,
 
-        },
-        DLL_THREAD_ATTACH => {
+        _ => unreachable!(),
+    };
 
-        },
-        DLL_THREAD_DETACH => {
+    BOOL::from(result)
+}
 
-        },
+fn on_pocess_attach(handle: HINSTANCE) -> Result<()> {
+    mb!("attached successfully\nwith handle: {:#x?}", &handle.0);
 
-        _ => unreachable!()
+    alloc_console()?;
+    setup_logger()?;
+
+    if let Err(e) = init_hooks() {
+        error!("error when init hook: {}", e);
     }
 
-    BOOL::from(true)
+    Ok(())
 }

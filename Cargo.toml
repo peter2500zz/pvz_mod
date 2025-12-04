@@ -8,6 +8,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 anyhow = "1.0.100"
-minhook = "0.8.0"
+fern = { version = "0.7.1", features = ["colored"] }
+minhook = { path = "D:\\Files\\Rust\\minhook" }
+tracing = "0.1.43"
 widestring = "1.2.1"
-windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_System_SystemServices", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_WindowsAndMessaging"] }
+windows_wrapper = { path = "D:\\Files\\Rust\\windows_wrapper" }
