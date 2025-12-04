@@ -5,7 +5,10 @@ use anyhow::Result;
 use inventory;
 use minhook::MinHook;
 use std::ffi::c_void;
-use tracing::trace;
+use tracing::{
+    trace,
+    error
+};
 
 // const ADDR_BOARD_ADDCOIN: *mut c_void = 0x0040CB10 as _;
 // type SignBoardAddCoin = extern "thiscall" fn(*mut c_void, i32, i32, u32, u32) -> *mut c_void;
@@ -29,13 +32,21 @@ use tracing::trace;
 
 fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
     unsafe {
-        let trampoline = MinHook::create_hook(target, detour)?;
+        let trampoline = MinHook::create_hook(target, detour);
 
-        // MinHook::enable_hook(target)?;
+        match &trampoline {
+            Ok(trampoline) => {
+                trace!("Hook {:#x?} -> {:#x?}", target, detour);
 
-        trace!("Hook {:#x?} -> {:#x?}", target, detour);
+                Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
+            },
+            Err(e) => {
+                error!("Hook {:#x?} 时出现错误: {}", target, e);
 
-        Ok(std::mem::transmute_copy::<*mut c_void, F>(&trampoline))
+                trampoline?;
+                unreachable!()
+            }
+        }
     }
 }
 

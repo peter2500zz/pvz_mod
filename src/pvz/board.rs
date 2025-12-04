@@ -1,8 +1,13 @@
 
-use tracing::{debug, trace};
+use tracing::trace;
 
-use crate::{hook::pvz::board::{ORIGINAL_BOARD_CONSTRUCTOR, ORIGINAL_BOARD_DESTRUCTOR, ORIGINAL_BOARD_INIT_LEVEL}, pvz::lawn_app::LawnApp};
-
+use crate::{
+    hook::pvz::board::{
+        ORIGINAL_BOARD_CONSTRUCTOR, 
+        ORIGINAL_BOARD_DESTRUCTOR, 
+        ORIGINAL_BOARD_INIT_LEVEL
+    }, pvz::lawn_app::LawnApp
+};
 
 
 #[derive(Debug)]
@@ -17,14 +22,14 @@ pub extern "thiscall" fn Constructor(
     uninit: *mut Board, 
     theApp: *mut LawnApp
 ) -> *mut Board {
-    trace!("构造");
+    trace!("构造 Board");
 
     let this = ORIGINAL_BOARD_CONSTRUCTOR.wait()(
         uninit,
         theApp
     );
 
-    debug!("地址 {:#x?}", this);
+    trace!("地址 {:#x?}", this);
 
     this
 }
@@ -33,7 +38,7 @@ pub extern "thiscall" fn Constructor(
 pub extern "thiscall" fn Destructor(
     this: *mut Board
 ) {
-    trace!("析构");
+    trace!("析构 Board");
 
     ORIGINAL_BOARD_DESTRUCTOR.wait()(this);
 }
@@ -44,7 +49,7 @@ pub extern "thiscall" fn Destructor(
 pub extern "stdcall" fn InitLevel(
     this: *mut Board
 ) {
-    trace!("初始化");
+    trace!("初始化 Board");
 
     ORIGINAL_BOARD_INIT_LEVEL.wait()(this);
 }

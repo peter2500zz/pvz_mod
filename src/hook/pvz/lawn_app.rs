@@ -32,6 +32,15 @@ type SignLawnAppInit = extern "thiscall" fn(
 /// `LawnApp::Init` 的跳板
 pub static ORIGINAL_LAWNAPP_INIT: OnceLock<SignLawnAppInit> = OnceLock::new();
 
+/// `LawnApp::LostFocus` 的地址
+const ADDR_LAWNAPP_LOST_FOCUS: *mut c_void = 0x0044F460 as _;
+/// `LawnApp::LostFocus` 的签名
+type SignLawnAppLostFocus = extern "thiscall" fn(
+    this: *mut LawnApp
+);
+/// `LawnApp::LostFocus` 的跳板
+pub static ORIGINAL_LAWNAPP_LOST_FOCUS: OnceLock<SignLawnAppLostFocus> = OnceLock::new();
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_LAWNAPP_CONSTRUCTOR.set(
@@ -44,6 +53,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_LAWNAPP_INIT.set(
             hook(ADDR_LAWNAPP_INIT, lawn_app::Init as _)?
+        );
+
+        let _ = ORIGINAL_LAWNAPP_LOST_FOCUS.set(
+            hook(ADDR_LAWNAPP_LOST_FOCUS, lawn_app::LostFocus as _)?
         );
 
         Ok(())
