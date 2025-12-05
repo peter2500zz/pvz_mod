@@ -2,6 +2,7 @@ pub mod lawn_app;
 pub mod debug;
 pub mod board;
 pub mod widget_manager;
+pub mod zombie;
 
 use inventory;
 use std::{ffi::c_void, sync::OnceLock};

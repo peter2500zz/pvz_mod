@@ -33,28 +33,35 @@ type SignWidgetManagerKeydown = fn(
 );
 /// `WidgetManager::KeyDown` 的跳板
 static ORIGINAL_WIDGET_MANAGER_KEY_DOWN: OnceLock<SignWidgetManagerKeydown> = OnceLock::new();
+
 /// 从 `usercall` 中提取参数的辅助函数
 #[unsafe(naked)]
 extern "C" fn KeyDownHelper() {
     naked_asm!(
+        // 压栈 usercall 参数
         "push ecx",
         "push eax",
-
+        // 调用 hook 函数
         "call {hook}",
-
+        // 返回
         "ret",
 
         hook = sym widget_manager::KeyDown,
     )
 }
+
 /// 回调辅助函数
-pub extern "stdcall" fn original_widget_manager_key_down(this: *mut WidgetManager, key: i32) -> u8 {
+pub extern "stdcall" fn KeyDownWrapper(this: *mut WidgetManager, key: i32) -> u8 {
     unsafe {
         let result: u32;
         asm!(
+            // 把参数放入原函数期望的寄存器中
             "mov ecx, {key}",
             "mov eax, {this}",
+            // 调用原函数
+            // 注意 OnceLock 存储的是指向原函数的指针，这里解一次指针
             "call dword ptr [{func}]",
+            // 提取返回值
             "mov {result}, eax",
 
             key = in(reg) key,

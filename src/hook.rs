@@ -59,13 +59,21 @@ where
             module_name.clone(),
             proc_name.clone(), 
             detour
-        )?;
+        );
 
-        // MinHook::enable_hook(trampoline)?;
+        match &trampoline {
+            Ok(trampoline) => {
+                trace!("Hook API {}::{} -> {:#x?}", module_name.as_ref(), proc_name.as_ref(), detour);
 
-        trace!("Hook API {}::{} -> {:#x?}", module_name.as_ref(), proc_name.as_ref(), detour);
+                Ok(std::mem::transmute_copy::<*mut c_void, F>(trampoline))
+            },
+            Err(e) => {
+                error!("Hook API {}::{} 时出现错误: {}", module_name.as_ref(), proc_name.as_ref(), e);
 
-        Ok(std::mem::transmute_copy::<*mut c_void, F>(&trampoline))
+                trampoline?;
+                unreachable!()
+            }
+        }
     }
 }
 

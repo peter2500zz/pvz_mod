@@ -32,6 +32,16 @@ type SignBoardInitLevel = extern "stdcall" fn(
 /// `Board::InitLevel` 的跳板
 pub static ORIGINAL_BOARD_INIT_LEVEL: OnceLock<SignBoardInitLevel> = OnceLock::new();
 
+/// `Board::KeyDown` 的地址
+const ADDR_BOARD_KEYDOWN: *mut c_void = 0x0041B820 as _;
+/// `Board::KeyDown` 的签名
+type SignBoardKeyDown = extern "thiscall" fn(
+    this: *mut Board, 
+    keycode: i32,
+);
+/// `Board::KeyDown` 的跳板
+pub static ORIGINAL_BOARD_KEYDOWN: OnceLock<SignBoardKeyDown> = OnceLock::new();
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_BOARD_CONSTRUCTOR.set(
@@ -44,6 +54,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_BOARD_INIT_LEVEL.set(
             hook(ADDR_BOARD_INIT_LEVEL, board::InitLevel as _)?
+        );
+
+        let _ = ORIGINAL_BOARD_KEYDOWN.set(
+            hook(ADDR_BOARD_KEYDOWN, board::KeyDown as _)?
         );
 
         Ok(())

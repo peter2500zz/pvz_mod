@@ -1,12 +1,14 @@
 
+use std::ffi::c_void;
+
 use tracing::trace;
 
 use crate::{
-    hook::pvz::board::{
+    hook::pvz::{board::{
         ORIGINAL_BOARD_CONSTRUCTOR, 
         ORIGINAL_BOARD_DESTRUCTOR, 
-        ORIGINAL_BOARD_INIT_LEVEL
-    }, pvz::lawn_app::LawnApp
+        ORIGINAL_BOARD_INIT_LEVEL, ORIGINAL_BOARD_KEYDOWN
+    }, zombie::{data_array_alloc, zombie_zombie_initialize}}, pvz::lawn_app::LawnApp
 };
 
 
@@ -52,4 +54,36 @@ pub extern "stdcall" fn InitLevel(
     trace!("初始化 Board");
 
     ORIGINAL_BOARD_INIT_LEVEL.wait()(this);
+}
+
+/// `Board::KeyDown` 的 hook 函数
+pub extern "thiscall" fn KeyDown(
+    this: *mut Board, 
+    keycode: i32, 
+) {
+    trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
+
+    match keycode {
+        65 => {
+            let array = ((this as u32) + 0x90) as *mut c_void;
+            let zombie = data_array_alloc(
+                array
+            );
+            zombie_zombie_initialize(
+                zombie,
+                0,
+                0,
+                false.into(),
+                0 as _,
+                0
+            )
+        }
+        _ => (),
+    }
+
+    // 回调
+    ORIGINAL_BOARD_KEYDOWN.wait()(
+        this, 
+        keycode
+    );
 }
