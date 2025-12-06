@@ -345,6 +345,7 @@ dependencies = [
  "inventory",
  "minhook",
  "mlua",
+ "regex",
  "tracing",
  "widestring",
  "windows",

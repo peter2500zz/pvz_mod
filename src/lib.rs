@@ -4,12 +4,12 @@ mod logger;
 #[allow(non_snake_case)]
 mod pvz;
 mod utils;
+mod mods;
 
 use anyhow::Result;
 use std::ffi::c_void;
 use tracing::{
-    info,
-    debug
+    debug, error, info
 };
 use windows::{
     Win32::{
@@ -25,7 +25,7 @@ use windows::{
 };
 use windows_wrapper::mb;
 
-use crate::{debug::alloc_console, hook::init_hook, logger::setup_logger};
+use crate::{debug::alloc_console, hook::init_hook, logger::setup_logger, mods::load_mods};
 
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]
@@ -72,6 +72,17 @@ fn on_pocess_attach(handle: HINSTANCE) -> Result<()> {
     init_hook()?;
 
     info!("Hook 成功");
+
+    match load_mods() {
+        Ok(loaded) => {
+            if loaded != 0 {
+                info!("共加载 {} 个 Mod", loaded);
+            }
+        },
+        Err(e) => {
+            error!("加载 Mod 时出现错误: {}", e)
+        }
+    }
 
     Ok(())
 }

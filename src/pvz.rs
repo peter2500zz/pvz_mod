@@ -3,6 +3,7 @@ pub mod debug;
 pub mod board;
 pub mod widget_manager;
 pub mod zombie;
+pub mod data_array;
 
 use tracing::{debug, info};
 use windows::{
