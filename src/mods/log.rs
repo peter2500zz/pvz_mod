@@ -1,7 +1,29 @@
 use mlua::prelude::*;
-use tracing::info;
+use tracing::{
+    trace,
+    debug,
+    info,
+    warn,
+    error
+};
 
 use super::LuaRegistration;
+
+macro_rules! create_log_func {
+    ($lua:expr, $log_table:expr, $name:expr, $macro:ident) => {{
+        let func = $lua.create_function(|_, args: LuaVariadic<LuaValue>| {
+            let message: String = args
+                .iter()
+                .map(|v| v.to_string().unwrap_or_else(|_| format!("{:?}", v)))
+                .collect();
+            
+            $macro!("{}", message);
+            Ok(())
+        })?;
+        $log_table.set($name, func)?;
+    }};
+}
+
 
 inventory::submit! {
     LuaRegistration(|lua| {
@@ -10,24 +32,13 @@ inventory::submit! {
 
         let log_table = lua.create_table()?;
 
-        let info_func = lua.create_function(|_, args: LuaVariadic<LuaValue>| {
-            let mut message = String::new();
-            for (_, v) in args.iter().enumerate() {
-                if let Ok(string) = v.to_string() {
-                    message += &string;
-                } else {
-                    message += &format!("{:?}", v);
-                }
-            }
+        create_log_func!(lua, log_table, "trace", trace);
+        create_log_func!(lua, log_table, "debug", debug);
+        create_log_func!(lua, log_table, "info", info);
+        create_log_func!(lua, log_table, "warn", warn);
+        create_log_func!(lua, log_table, "error", error);
 
-            info!("{}", message);
-
-            Ok(())
-        })?;
-
-        log_table.set("info", info_func)?;
-
-        globals.set("log", log_table)?;
+        globals.set("Log", log_table)?;
 
         Ok(())
     })

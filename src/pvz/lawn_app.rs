@@ -3,10 +3,10 @@ pub mod loading;
 use tracing::{debug, trace};
 
 use crate::hook::pvz::lawn_app::{
-    ORIGINAL_LAWNAPP_CONSTRUCTOR, 
-    ORIGINAL_LAWNAPP_DESTRUCTOR, 
-    ORIGINAL_LAWNAPP_INIT, 
-    ORIGINAL_LAWNAPP_LOST_FOCUS
+    ORIGINAL_CONSTRUCTOR, 
+    ORIGINAL_DESTRUCTOR, 
+    ORIGINAL_INIT, 
+    ORIGINAL_LOST_FOCUS
 };
 
 #[derive(Debug)]
@@ -24,7 +24,7 @@ pub extern "stdcall" fn Constructor(
 ) -> *mut LawnApp {
     trace!("构造 LawnApp");
 
-    let this = ORIGINAL_LAWNAPP_CONSTRUCTOR.wait()(
+    let this = ORIGINAL_CONSTRUCTOR.wait()(
         uninit
     );
 
@@ -39,7 +39,7 @@ pub extern "thiscall" fn Destructor(
 ) {
     trace!("析构 LawnApp");
 
-    ORIGINAL_LAWNAPP_DESTRUCTOR.wait()(
+    ORIGINAL_DESTRUCTOR.wait()(
         this
     );
 }
@@ -52,7 +52,7 @@ pub extern "thiscall" fn Init(
 ) {
     trace!("初始化 LawnApp");
 
-    ORIGINAL_LAWNAPP_INIT.wait()(
+    ORIGINAL_INIT.wait()(
         this
     );
 }
@@ -66,7 +66,7 @@ pub extern "thiscall" fn LostFocus(
     debug!("游戏失去焦点");
 
     let _ = this;
-    let _ = ORIGINAL_LAWNAPP_LOST_FOCUS;
+    let _ = ORIGINAL_LOST_FOCUS;
     // 仙布暂停
     // ORIGINAL_LAWNAPP_LOST_FOCUS.wait()(
     //     this

@@ -6,7 +6,7 @@ use crate::pvz::zombie::{self, Zombie};
 use super::{HookRegistration, hook};
 
 /// `DataArray::DataArrayAlloc` 构造函数的地址
-const ADDR_DATA_ARRAY_ALLOC: *mut c_void = 0x0041DDA0 as _;
+const ADDR_DATA_ARRAY_ALLOC: u32 = 0x0041DDA0 as _;
 /// `DataArray::DataArrayAlloc` 构造函数的签名
 type SignDataArrayAlloc = fn(
     this: *mut c_void,
@@ -57,11 +57,11 @@ pub extern "stdcall" fn DataArrayAllocWrapper(
 }
 
 /// `Zombie::ZombieInitialize` 的地址
-const ADDR_ZOMBIE_ZOMBIE_INITIALIZE: *mut c_void = 0x00522580 as _;
+const ADDR_ZOMBIE_INITIALIZE: u32 = 0x00522580 as _;
 /// `Zombie::ZombieInitialize` 的签名
 /// 
 /// 仅标注用
-type SignZombieZombieInitialize = fn(
+type SignZombieInitialize = fn(
     this: *mut Zombie,
     theRow: i32,
     theZombieType: i32,
@@ -70,7 +70,7 @@ type SignZombieZombieInitialize = fn(
     theFromWave: i32,
 );
 /// `Zombie::ZombieInitialize` 的跳板
-static ORIGINAL_ZOMBIE_ZOMBIE_INITIALIZE: OnceLock<SignZombieZombieInitialize> = OnceLock::new();
+static ORIGINAL_ZOMBIE_INITIALIZE: OnceLock<SignZombieInitialize> = OnceLock::new();
 
 /// 从 `usercall` 中提取参数的辅助函数
 #[unsafe(naked)]
@@ -100,7 +100,7 @@ pub extern "stdcall" fn ZombieInitializeWrapper(
     theFromWave: i32,
 ) {
     // 获取原函数的指针
-    let func = ORIGINAL_ZOMBIE_ZOMBIE_INITIALIZE.wait();
+    let func = ORIGINAL_ZOMBIE_INITIALIZE.wait();
     unsafe {
         asm!(
             // 压参数
@@ -129,11 +129,11 @@ pub extern "stdcall" fn ZombieInitializeWrapper(
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_DATA_ARRAY_ALLOC.set(
-            hook(ADDR_DATA_ARRAY_ALLOC, DataArrayAllocHelper as _)?
+            hook(ADDR_DATA_ARRAY_ALLOC as _, DataArrayAllocHelper as _)?
         );
 
-        let _ = ORIGINAL_ZOMBIE_ZOMBIE_INITIALIZE.set(
-            hook(ADDR_ZOMBIE_ZOMBIE_INITIALIZE, ZombieInitializeHelper as _)?
+        let _ = ORIGINAL_ZOMBIE_INITIALIZE.set(
+            hook(ADDR_ZOMBIE_INITIALIZE as _, ZombieInitializeHelper as _)?
         );
 
         Ok(())

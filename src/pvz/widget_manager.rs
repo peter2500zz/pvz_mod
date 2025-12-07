@@ -3,7 +3,7 @@ use tracing::trace;
 
 use crate::{
     hook::pvz::widget_manager::{
-        KeyDownWrapper, ORIGINAL_WIDGET_MANAGER_CONSTRUCTOR, ORIGINAL_WIDGET_MANAGER_DESTRUCTOR
+        KeyDownWrapper, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR
     }, 
     pvz::lawn_app::LawnApp
 };
@@ -23,7 +23,7 @@ pub extern "stdcall" fn Constructor(
 ) -> *mut WidgetManager {
     trace!("构造 WidgetManager");
 
-    let this = ORIGINAL_WIDGET_MANAGER_CONSTRUCTOR.wait()(
+    let this = ORIGINAL_CONSTRUCTOR.wait()(
         uninit,
         theApp
     );
@@ -39,7 +39,7 @@ pub extern "thiscall" fn Destructor(
 ) {
     trace!("析构 WidgetManager");
 
-    ORIGINAL_WIDGET_MANAGER_DESTRUCTOR.wait()(this);
+    ORIGINAL_DESTRUCTOR.wait()(this);
 }
 
 pub extern "stdcall" fn KeyDown(

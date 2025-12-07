@@ -10,26 +10,6 @@ use tracing::{
     error
 };
 
-// const ADDR_BOARD_ADDCOIN: *mut c_void = 0x0040CB10 as _;
-// type SignBoardAddCoin = extern "thiscall" fn(*mut c_void, i32, i32, u32, u32) -> *mut c_void;
-// static mut ORIGINAL_BOARD_ADDCOIN: Option<SignBoardAddCoin> = None;
-
-// extern "thiscall" fn board_add_coin(
-//     board: *mut c_void,
-//     x: i32,
-//     y: i32,
-//     coin_type: u32,
-//     coin_motion: u32,
-// ) -> *mut c_void {
-//     let my_coin = match coin_type {
-//         4 => 3,
-
-//         _ => coin_type,
-//     };
-
-//     unsafe { ORIGINAL_BOARD_ADDCOIN.unwrap()(board, x, y, my_coin, coin_motion) }
-// }
-
 fn hook<F>(target: *mut c_void, detour: *mut c_void) -> Result<F> {
     unsafe {
         let trampoline = MinHook::create_hook(target, detour);

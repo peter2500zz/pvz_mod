@@ -1,4 +1,4 @@
-mod register;
+pub mod register;
 mod log;
 
 use anyhow::{Context, Result}; // 建议引入 Context 方便报错
@@ -15,7 +15,7 @@ const MOD_DIR: &str = "mods";
 const MAIN_FILE: &str = "main.lua";
 
 type LuaInitFn = fn(&mut Lua) -> LuaResult<()>;
-struct LuaRegistration(LuaInitFn);
+pub struct LuaRegistration(pub LuaInitFn);
 
 inventory::collect!(LuaRegistration);
 

@@ -5,13 +5,16 @@ use tracing::{debug, trace};
 use windows::core::BOOL;
 
 use crate::{
-    hook::pvz::board::{
-            ORIGINAL_BOARD_CONSTRUCTOR, 
-            ORIGINAL_BOARD_DESTRUCTOR, 
-            ORIGINAL_BOARD_INIT_LEVEL, 
-            ORIGINAL_BOARD_KEYDOWN
-        }, 
-    pvz::{
+    add_callback, callback, hook::pvz::board::{
+        ADDR_ADDCOIN,
+        ORIGINAL_ADDCOIN, 
+        ORIGINAL_CONSTRUCTOR, 
+        ORIGINAL_DESTRUCTOR, 
+        ORIGINAL_INIT_LEVEL, 
+        ORIGINAL_KEYDOWN
+    }, mods::register::{
+        POST, PRE
+    }, pvz::{
         data_array::DataArray, lawn_app::LawnApp, zombie::{self, Zombie}
     }
 };
@@ -275,7 +278,7 @@ pub extern "thiscall" fn Constructor(
 ) -> *mut Board {
     trace!("构造 Board");
 
-    let this = ORIGINAL_BOARD_CONSTRUCTOR.wait()(
+    let this = ORIGINAL_CONSTRUCTOR.wait()(
         uninit,
         theApp
     );
@@ -291,7 +294,7 @@ pub extern "thiscall" fn Destructor(
 ) {
     trace!("析构 Board");
 
-    ORIGINAL_BOARD_DESTRUCTOR.wait()(this);
+    ORIGINAL_DESTRUCTOR.wait()(this);
 }
 
 /// `Board` 的初始化函数
@@ -304,8 +307,43 @@ pub extern "stdcall" fn InitLevel(
         trace!("初始化 Board 大小 {}", size_of_val(&*this));
     }
 
-    ORIGINAL_BOARD_INIT_LEVEL.wait()(this);
+    ORIGINAL_INIT_LEVEL.wait()(this);
 }
+
+/// 在游戏中生成掉落物的函数
+pub extern "thiscall" fn AddCoin(
+    this: *mut Board, 
+    theX: i32, 
+    theY: i32, 
+    theCoinType: u32, 
+    theCoinMotion: u32
+) -> *mut c_void {
+    trace!("产生掉落物 {} at ({}, {}) with motion {}", theCoinType, theX, theY, theCoinMotion);
+    let (
+        this,
+        theX,
+        theY,
+        theCoinType,
+        theCoinMotion
+    ) = callback!(PRE | ADDR_ADDCOIN, (
+        this,
+        theX,
+        theY,
+        theCoinType,
+        theCoinMotion
+    ));
+
+    let (result, ) = callback!(POST | ADDR_ADDCOIN, (ORIGINAL_ADDCOIN.wait()(
+        this, 
+        theX, 
+        theY, 
+        theCoinType, 
+        theCoinMotion
+    )));
+
+    result
+}
+add_callback!("board_addcoin", ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(
@@ -339,7 +377,7 @@ pub extern "thiscall" fn KeyDown(
     }
 
     // 回调
-    ORIGINAL_BOARD_KEYDOWN.wait()(
+    ORIGINAL_KEYDOWN.wait()(
         this, 
         keycode
     );
