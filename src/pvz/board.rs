@@ -5,15 +5,13 @@ use tracing::{debug, trace};
 use windows::core::BOOL;
 
 use crate::{
-    add_callback, hook::pvz::board::{
-        ADDR_ADDCOIN,
+    hook::pvz::board::{
         ORIGINAL_ADDCOIN, 
         ORIGINAL_CONSTRUCTOR, 
         ORIGINAL_DESTRUCTOR, 
         ORIGINAL_INIT_LEVEL, 
         ORIGINAL_KEYDOWN
-    }, 
-    mods::register::callback_mut, 
+    },
     pvz::{
         coin::Coin, 
         data_array::DataArray, 
@@ -345,16 +343,8 @@ pub extern "thiscall" fn AddCoin(
         theCoinMotion
     );
 
-    unsafe {
-        let coin = &mut (*coin);
-
-        callback_mut(ADDR_ADDCOIN, coin);
-
-    }
-
     coin
 }
-add_callback!("ADD_COIN", ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(
@@ -365,7 +355,7 @@ pub extern "thiscall" fn KeyDown(
 
     match keycode {
         65 => {
-            let array = ((this as u32) + 0x90) as *mut c_void;
+            let array = ((this as u32) + 0x90) as *mut DataArray<Zombie>;
             let zombie = zombie::DataArrayAlloc(
                 array
             );

@@ -3,6 +3,7 @@ pub mod debug;
 pub mod board;
 pub mod widget_manager;
 pub mod zombie;
+pub mod coin;
 
 use inventory;
 use std::sync::OnceLock;

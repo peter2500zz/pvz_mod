@@ -2,7 +2,7 @@ use std::ffi::c_void;
 use tracing::trace;
 use windows::core::BOOL;
 
-use crate::hook::pvz::zombie::{DataArrayAllocWrapper, ZombieInitializeWrapper};
+use crate::{hook::pvz::zombie::{DataArrayAllocWrapper, ZombieInitializeWrapper}, pvz::data_array::DataArray};
 
 
 #[repr(C)]
@@ -203,7 +203,7 @@ pub struct Zombie {
 
 /// `DataArray::DataArrayAlloc` 的 hook 函数
 pub extern "stdcall" fn DataArrayAlloc(
-    this: *mut c_void,
+    this: *mut DataArray<Zombie>,
 ) -> *mut Zombie {
     trace!("alloc zombie");
     DataArrayAllocWrapper(this)

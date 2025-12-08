@@ -24,53 +24,53 @@ macro_rules! add_callback {
     };
 }
 
-pub fn callback<T>(at: u32, args: T) -> T
-where 
-    T: IntoLuaMulti + FromLuaMulti + Clone,
-{
-    let result_callback_funcs = with_lua(|lua| {
-        // 取得全局变量表
-        let globals = lua.globals();
+// pub fn callback<T>(at: u32, args: T) -> T
+// where 
+//     T: IntoLuaMulti + FromLuaMulti + Clone,
+// {
+//     let result_callback_funcs = with_lua(|lua| {
+//         // 取得全局变量表
+//         let globals = lua.globals();
 
-        // 获取回调函数表
-        globals.set("Callbacks", globals.get("Callbacks").unwrap_or(lua.create_table()?))?;
-        let callbacks: LuaTable = globals.get("Callbacks")?;
+//         // 获取回调函数表
+//         globals.set("Callbacks", globals.get("Callbacks").unwrap_or(lua.create_table()?))?;
+//         let callbacks: LuaTable = globals.get("Callbacks")?;
 
-        // 获取回调点表
-        callbacks.set(at, callbacks.get(at).unwrap_or(lua.create_table()?))?;
-        let callback_point: LuaTable = callbacks.get(at)?;
+//         // 获取回调点表
+//         callbacks.set(at, callbacks.get(at).unwrap_or(lua.create_table()?))?;
+//         let callback_point: LuaTable = callbacks.get(at)?;
 
-        let pairs = callback_point.pairs::<i32, LuaFunction>();
+//         let pairs = callback_point.pairs::<i32, LuaFunction>();
 
-        let mut funcs = Vec::new();
+//         let mut funcs = Vec::new();
 
-        for pair in pairs {
-            let (_, func) = pair?;
+//         for pair in pairs {
+//             let (_, func) = pair?;
 
-            funcs.push(func);
-        }
+//             funcs.push(func);
+//         }
 
-        Ok(funcs)
-    });
+//         Ok(funcs)
+//     });
     
-    match result_callback_funcs {
-        Ok(callback_funcs) => {
-            let mut args = args;
-            for callback_func in callback_funcs {
-                let args_clone = args.clone();
-                if let Ok(result) = callback_func.call(args_clone) {
-                    args = result;
-                }
-            }
-            args
-        },
-        Err(_) => args
-    }
-}
+//     match result_callback_funcs {
+//         Ok(callback_funcs) => {
+//             let mut args = args;
+//             for callback_func in callback_funcs {
+//                 let args_clone = args.clone();
+//                 if let Ok(result) = callback_func.call(args_clone) {
+//                     args = result;
+//                 }
+//             }
+//             args
+//         },
+//         Err(_) => args
+//     }
+// }
 
 // 修改点 1: 这里的 args 类型变为 &mut T，且不再有返回值
 // 约束 T 必须实现 UserData (因为我们要把它暴露给 Lua)
-pub fn callback_mut<T>(at: u32, args: &mut T)
+pub fn callback<T>(at: u32, args: &mut T)
 where 
     T: LuaUserData + 'static,
 {
