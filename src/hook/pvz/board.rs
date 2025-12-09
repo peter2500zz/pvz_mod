@@ -2,14 +2,14 @@
 use std::{arch::{asm, naked_asm}, sync::OnceLock};
 
 use super::{HookRegistration, hook};
-use crate::pvz::{
+use crate::{pvz::{
     board::{
         self, 
         board::Board
     }, 
     coin::Coin, 
     lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie
-};
+}, utils::Vec2};
 
 /// `Board` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x00407B50;
@@ -44,8 +44,7 @@ pub const ADDR_ADDCOIN: u32 = 0x0040CB10;
 /// `Board::AddCoin` 的签名
 type SignAddCoin = extern "thiscall" fn(
     this: *mut Board, 
-    theX: i32, 
-    theY: i32, 
+    pos: Vec2<i32>,
     theCoinType: u32, 
     theCoinMotion: u32
 ) -> *mut Coin;

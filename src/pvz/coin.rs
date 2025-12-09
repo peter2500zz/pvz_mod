@@ -5,12 +5,10 @@ use tracing::trace;
 use windows::core::BOOL;
 
 use crate::{
-    add_field_mut, 
-    hook::pvz::coin::{
+    add_field_mut, hook::pvz::coin::{
         CoinInitializeWrapper, 
         DataArrayAllocWrapper
-    }, 
-    pvz::data_array::DataArray
+    }, mods::LuaRegistration, pvz::data_array::DataArray
 };
 
 
@@ -87,25 +85,59 @@ pub struct Coin {
     pub coin_id: i32,
 }
 
+inventory::submit! {
+    LuaRegistration(|lua| {
+        let global = lua.globals();
+        let coin_types = lua.create_table()?;
+
+        coin_types.set("SILVER_COIN", 1)?;  // 银币
+        coin_types.set("GOLD_COIN", 2)?;  // 金币
+        coin_types.set("DIAMOND", 3)?;  // 钻石
+        coin_types.set("SUN", 4)?;  // 太阳
+        coin_types.set("SMALL_SUN", 5)?;  // 小太阳
+        coin_types.set("LARGE_SUN", 6)?;  // 大太阳
+        coin_types.set("SEED_PACKET", 7)?;  // 植物卡片
+        coin_types.set("TROPHY", 8)?;  // 奖杯
+        coin_types.set("SHOVEL", 9)?;  // 铲子
+        coin_types.set("ALMANAC", 10)?;  // 图鉴
+        coin_types.set("KEY", 11)?;  // 钥匙
+        coin_types.set("VASE", 12)?;  // 花瓶
+        coin_types.set("WATERING_CAN", 13)?;  // 洒水壶
+        coin_types.set("SANDWICH", 14)?;  // 三明治
+        coin_types.set("NOTE", 15)?;  // 便条/遗书
+        coin_types.set("VANISH_PLACEHOLDER", 16)?;  // 立即消失(占位)
+        coin_types.set("SEEDLING_GIFT", 17)?;  // 花苗礼盒
+        coin_types.set("COIN_BAG", 18)?;  // 金币袋
+        coin_types.set("GIFT_BOX_PERSISTENT", 19)?;  // 礼盒(不消失)
+        coin_types.set("COIN_BAG_PERSISTENT", 20)?;  // 金币袋(不消失)
+        coin_types.set("SILVER_TROPHY", 21)?;  // 银奖杯
+        coin_types.set("GOLD_TROPHY", 22)?;  // 金奖杯
+        coin_types.set("CHOCOLATE", 23)?;  // 巧克力
+        coin_types.set("CHOCOLATE_PERSISTENT", 24)?;  // 巧克力(不消失)
+        coin_types.set("GIFT_BOX_MINI_GAMES", 25)?;  // 礼品盒(小游戏)
+        coin_types.set("GIFT_BOX_PUZZLE", 26)?;  // 礼品盒(解密模式)
+        coin_types.set("GIFT_BOX_SURVIVAL", 27)?;  // 礼品盒(生存模式)
+
+        global.set("CoinTypes", coin_types)?;
+
+        let coin_motions = lua.create_table()?;
+
+        coin_motions.set("DROP_FROM_XY", 0)?;  // 从坐标落下
+        coin_motions.set("SLOW_DROP_FROM_XY", 1)?;  // 从坐标缓慢落下
+        coin_motions.set("POP_FROM_BACK", 2)?;  // 从后方跳出
+        coin_motions.set("FAST_POP_FROM_BACK", 3)?;  // 从后方快速跳出
+        coin_motions.set("COLLECT_IMMEDIATELY", 4)?;  // 直接收集
+        coin_motions.set("AUTO_COLLECT_LATER", 5)?;  // 稍后自动收集
+        coin_motions.set("POP_FROM_RIGHT", 6)?;  // 从屏幕右侧蹦出
+        coin_motions.set("SPAWN_IN_SEED_SLOT", 7)?;  // 在卡槽栏生成
+
+        global.set("CoinMotions", coin_motions)?;
+
+        Ok(())
+    })
+}
+
 impl LuaUserData for Coin {
-    // fn add_methods<'lua, M: LuaUserDataMethods<Self>>(methods: &mut M) {
-    //     methods.add_meta_method(LuaMetaMethod::Index, |_, this, key: String| {
-    //         match key.as_str() {
-    //             "x" => Ok(LuaValue::Integer(this.x as i64)),
-    //             "y" => Ok(LuaValue::Integer(this.y as i64)),
-    //             _ => Ok(LuaValue::Nil),
-    //         }
-    //     });
-
-    //     methods.add_meta_method_mut(LuaMetaMethod::NewIndex, |_, this, key: String| {
-    //         match key.as_str() {
-    //             "x" => Ok(LuaValue::Integer(this.x as i64)),
-    //             "y" => Ok(LuaValue::Integer(this.y as i64)),
-    //             _ => Ok(LuaValue::Nil),
-    //         }
-    //     });
-    // }
-
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         // // x
         // fields.add_field_method_get("x", |_, this| Ok(this.x));
@@ -116,7 +148,6 @@ impl LuaUserData for Coin {
 
     }
 }
-
 
 /// `DataArray::DataArrayAlloc` 的 hook 函数
 pub extern "stdcall" fn DataArrayAlloc(

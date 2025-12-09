@@ -11,7 +11,7 @@ use crate::{
         coin::Coin, 
         lawn_app::lawn_app::LawnApp, 
         zombie::zombie::Zombie
-    }
+    }, utils::Vec2
 };
 
 /// 这是 `Board` 的构造函数
@@ -55,18 +55,36 @@ pub extern "stdcall" fn InitLevel(
 
 #[repr(C)]
 pub struct ArgsAddCoin {
-    theX: i32, 
-    theY: i32, 
+    pos: Vec2<i32>,
     theCoinType: u32, 
     theCoinMotion: u32
 }
 
 impl LuaUserData for ArgsAddCoin {
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field_mut!(fields, "x", theX);
-        add_field_mut!(fields, "y", theY);
-        add_field_mut!(fields, "coin_type", theCoinType);
-        add_field_mut!(fields, "coin_motion", theCoinMotion);
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("GetPos", |_, this, ()| {
+            Ok(this.pos)
+        });
+
+        methods.add_method_mut("SetPos", |_, this, pos| {
+            Ok(this.pos = pos)
+        });
+
+        methods.add_method("GetCoinType", |_, this, ()| {
+            Ok(this.theCoinType)
+        });
+
+        methods.add_method_mut("SetCoinType", |_, this, coin_type| {
+            Ok(this.theCoinType = coin_type)
+        });
+
+        methods.add_method("GetCoinMotion", |_, this, ()| {
+            Ok(this.theCoinMotion)
+        });
+
+        methods.add_method_mut("SetCoinMotion", |_, this, coin_motion| {
+            Ok(this.theCoinMotion = coin_motion)
+        });
     }
 }
 
@@ -78,12 +96,11 @@ pub extern "thiscall" fn AddCoin(
     let mut args = args;
 
     callback_data(PRE | ADDR_ADDCOIN, &mut args);
-    trace!("产生掉落物 {} at ({}, {}) with motion {}", args.theCoinType, args.theX, args.theY, args.theCoinMotion);
+    trace!("产生掉落物 {} at {:?} with motion {}", args.theCoinType, args.pos, args.theCoinMotion);
 
     let coin = ORIGINAL_ADDCOIN.wait()(
         this, 
-        args.theX, 
-        args.theY, 
+        args.pos,  
         args.theCoinType, 
         args.theCoinMotion
     );

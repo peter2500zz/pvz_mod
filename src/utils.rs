@@ -48,12 +48,12 @@ macro_rules! add_field {
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Vec2<T: Sized> {
+pub struct Vec2<T: Sized + FromLua> {
     pub x: T,
     pub y: T,
 }
 
-impl<T> Vec2<T> {
+impl<T: FromLua> Vec2<T> {
     pub fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
@@ -84,19 +84,29 @@ where
     }
 }
 
+impl<T: FromLua> FromLua for Vec2<T> {
+    fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
+        if let Some(vec2) = value.as_userdata() {
+            Ok(Self::new(vec2.get("x")?, vec2.get("y")?))
+        } else {
+            Err(LuaError::ToLuaConversionError { from: value.to_string()?, to: "Vec2", message: None })
+        }
+    }
+}
+
 // ==========================================
 // Rect2 实现
 // ==========================================
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Rect2<T: Sized> {
+pub struct Rect2<T: Sized + FromLua> {
     pub position: Vec2<T>,
     pub size: Vec2<T>,
 }
 
 impl<T> Rect2<T> 
-where T: Copy
+where T: FromLua
 {
     pub fn new(x: T, y: T, width: T, height: T) -> Self {
         Self {
@@ -106,9 +116,19 @@ where T: Copy
     }
 }
 
+impl<T: FromLua> FromLua for Rect2<T> {
+    fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
+        if let Some(rect2) = value.as_userdata() {
+            Ok(Self::new(rect2.get("x")?, rect2.get("y")?, rect2.get("width")?, rect2.get("height")?))
+        } else {
+            Err(LuaError::ToLuaConversionError { from: value.to_string()?, to: "Rect2", message: None })
+        }
+    }
+}
+
 // Rect2 的 UserData 实现
 // 这里的约束条件与 Vec2 相同，因为 Rect2 内部包含 Vec2
-impl<T> LuaUserData for Rect2<T>
+impl<T: FromLua> LuaUserData for Rect2<T>
 where
     T: Copy + 'static + Send + Sync + Debug,
     for<'lua> T: FromLua + IntoLua,

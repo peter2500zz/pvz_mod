@@ -81,13 +81,12 @@ impl LuaUserData for Board {
             })
         });
 
-        methods.add_method("AddCoin", |_, _, (theX, theY, theCoinType, theCoinMotion)| {
+        methods.add_method("AddCoin", |_, _, (pos, theCoinType, theCoinMotion)| {
             with_board(|board| {
                 let coin = AddCoin(
                     board,
                     ArgsAddCoin {
-                        theX: theX,
-                        theY: theY,
+                        pos,
                         theCoinType: theCoinType,
                         theCoinMotion: theCoinMotion,
                     }
