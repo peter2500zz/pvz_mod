@@ -1,5 +1,5 @@
 
-use std::sync::OnceLock;
+use std::{arch::{asm, naked_asm}, sync::OnceLock};
 
 use super::{HookRegistration, hook};
 use crate::pvz::{
@@ -8,7 +8,7 @@ use crate::pvz::{
         board::Board
     }, 
     coin::Coin, 
-    lawn_app::lawn_app::LawnApp
+    lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie
 };
 
 /// `Board` 构造函数的地址
@@ -62,6 +62,81 @@ type SignKeyDown = extern "thiscall" fn(
 /// `Board::KeyDown` 的跳板
 pub static ORIGINAL_KEYDOWN: OnceLock<SignKeyDown> = OnceLock::new();
 
+/// `Board::AddZombieInRow` 的地址
+pub const ADDR_ADD_ZOMBIE_IN_ROW: u32 = 0x0040DDC0;
+/// `Board::AddZombieInRow` 的签名
+type SignAddZombieInRow = extern "stdcall" fn(
+    this: *mut Board, 
+    theZombieType: i32,
+    theRow: i32,
+    theFromWave: i32,
+) -> *mut Zombie;
+/// `Board::AddZombieInRow` 的跳板
+pub static ORIGINAL_ADD_ZOMBIE_IN_ROW: OnceLock<SignAddZombieInRow> = OnceLock::new();
+
+/// 从 `usercall` 中提取参数的辅助函数
+#[unsafe(naked)]
+extern "stdcall" fn AddZombieInRowHelper() {
+    naked_asm!(
+        // 压栈 usercall 参数
+        "push eax",
+        // 修正参数位置
+        "mov eax, [esp]",
+        "xchg eax, [esp+8]",
+        "xchg eax, [esp+4]",
+        "mov [esp], eax",
+        // 压栈 usercall 参数
+        "push ebx",
+        // 修正参数位置
+        "mov eax, [esp]",
+        "xchg eax, [esp+8]",
+        "xchg eax, [esp+4]",
+        "mov [esp], eax",
+        // 调用 hook 函数
+        "jmp {hook}",
+
+        hook = sym board::AddZombieInRow,
+    )
+}
+
+/// 回调辅助函数
+pub extern "stdcall" fn AddZombieInRowWrapper(
+    this: *mut Board, 
+    theZombieType: i32,
+    theRow: i32,
+    theFromWave: i32,
+) -> *mut Zombie {
+    // 获取原函数的指针
+    let func = ORIGINAL_ADD_ZOMBIE_IN_ROW.wait();
+    unsafe {
+        asm!(
+            "push ebx"
+        );
+        asm!(
+            // 压参数
+            "push {}",
+            "push {}",
+            in(reg) theRow,
+            in(reg) theZombieType,
+        );
+        let zombie;
+        asm!(
+            // 调用原函数
+            // 解指针获得真实地址
+            "call dword ptr [{func}]",
+            "mov {zombie}, eax",
+            in("eax") this,
+            in("ebx") theFromWave,
+            func = in(reg) func,
+            zombie = out(reg) zombie
+        );
+        asm!(
+            "pop ebx"
+        );
+        zombie
+    }
+}
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(
@@ -82,6 +157,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_KEYDOWN.set(
             hook(ADDR_KEYDOWN as _, board::KeyDown as _)?
+        );
+
+        let _ = ORIGINAL_ADD_ZOMBIE_IN_ROW.set(
+            hook(ADDR_ADD_ZOMBIE_IN_ROW as _, AddZombieInRowHelper as _)?
         );
 
         Ok(())

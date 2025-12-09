@@ -4,7 +4,7 @@ pub mod callback;
 
 use anyhow::{Context, Result}; // 建议引入 Context 方便报错
 use std::{
-    cell::RefCell, 
+    cell::UnsafeCell, 
     fs::{
         self, 
         DirEntry
@@ -29,7 +29,7 @@ pub struct LuaRegistration(pub LuaInitFn);
 inventory::collect!(LuaRegistration);
 
 thread_local! {
-static LUA: LazyLock<RefCell<Lua>> = LazyLock::new(|| {
+static LUA: LazyLock<UnsafeCell<Lua>> = LazyLock::new(|| {
     info!("初始化 Lua 状态机");
 
     let mut lua = Lua::new();
@@ -56,7 +56,7 @@ static LUA: LazyLock<RefCell<Lua>> = LazyLock::new(|| {
         panic!("Lua 初始化时出现错误: {}", e);
     }
 
-    RefCell::new(lua)
+    UnsafeCell::new(lua)
 });
 }
 
@@ -66,12 +66,12 @@ static EXTRACT: LazyLock<Option<Regex>> = LazyLock::new(|| {
 
 pub fn with_lua<F, T>(exec: F) -> LuaResult<T>
 where
-    F: FnOnce(&mut Lua) -> LuaResult<T>,
+    F: FnOnce(&Lua) -> LuaResult<T>,
     T: FromLuaMulti,
 {
     let result = LUA.with(|lua_cell| {
-        let mut lua = lua_cell.borrow_mut();
-        exec(&mut *lua)
+        let lua = unsafe { &*lua_cell.get() };
+        exec(lua)
     });
 
     if let Err(e) = &result {

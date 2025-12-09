@@ -1,12 +1,12 @@
 pub mod board;
 
-use tracing::{trace};
-use windows::core::BOOL;
+use tracing::trace;
+use mlua::prelude::*;
 
 use crate::{
-    add_callback, hook::pvz::board::{
-        ADDR_KEYDOWN, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
-    }, mods::callback::callback, pvz::{
+    add_callback, add_field_mut, hook::pvz::board::{
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_KEYDOWN, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
+    }, mods::callback::{PRE, callback, callback_data}, pvz::{
         board::board::Board, 
         coin::Coin, 
         data_array::DataArray, 
@@ -120,3 +120,41 @@ pub extern "thiscall" fn KeyDown(
     );
 }
 add_callback!("AT_BOARD_KEYDOWN", ADDR_KEYDOWN);
+
+#[repr(C)]
+pub struct ArgsAddZombieInRow {
+    theZombieType: i32,
+    theFromWave: i32,
+    this: *mut Board, 
+    theRow: i32,
+}
+
+impl LuaUserData for ArgsAddZombieInRow {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        add_field_mut!(fields, "row", theRow);
+        add_field_mut!(fields, "zombie_type", theZombieType);
+        
+        add_field_mut!(fields, "from_wave", theFromWave);
+    }
+}
+
+pub extern "stdcall" fn AddZombieInRow(
+    args: ArgsAddZombieInRow
+) -> *mut Zombie {
+    let mut args = args;
+    callback_data(PRE | ADDR_ADD_ZOMBIE_IN_ROW, &mut args);
+    trace!(
+        "在第 {} 波 行 {} 生成僵尸 类型 {}",
+        args.theFromWave,
+        args.theRow,
+        args.theZombieType
+    );
+
+    AddZombieInRowWrapper(
+        args.this, 
+        args.theZombieType, 
+        args.theRow, 
+        args.theFromWave
+    )
+}
+add_callback!("AT_NEW_ZOMBIE", PRE | ADDR_ADD_ZOMBIE_IN_ROW);

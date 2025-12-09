@@ -1,6 +1,8 @@
+use std::ptr;
+
 use mlua::prelude::*;
 
-use crate::pvz::lawn_app::lawn_app::get_lawn_app;
+use crate::pvz::{board::{AddZombieInRow, ArgsAddZombieInRow}, lawn_app::lawn_app::get_lawn_app};
 
 
 // inventory::submit! {
@@ -50,6 +52,21 @@ impl LuaUserData for Board {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("setSun", |_, _, value: i32| {
             with_board(|board| board.sun_value = value)
+        });
+
+        methods.add_method("addZombie", |_, _, (zombie_type, row, wave)| {
+            with_board(|board| {
+                let zombie = AddZombieInRow(ArgsAddZombieInRow {
+                    theZombieType: zombie_type,
+                    theFromWave: wave,
+                    this: board,
+                    theRow: row,
+                });
+
+                unsafe {
+                    ptr::read(zombie)
+                }
+            })
         });
     }
 
