@@ -2,7 +2,13 @@ use std::ffi::c_void;
 use windows::core::BOOL;
 use mlua::prelude::*;
 
-use crate::add_field_mut;
+use crate::{
+    add_field, 
+    pvz::{
+        board::board::get_board, 
+        data_array::HasId
+    }
+};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -199,10 +205,64 @@ pub struct Zombie {
     /// 0x158 僵尸ID(结构为[序列号,编号],序列号与编号各占2字节)
     pub zombie_id: i32,
 }
+const _: () = assert!(size_of::<Zombie>() == 0x15C);
+
+impl HasId for Zombie {
+    fn id(&self) -> i32 {
+        self.zombie_id
+    }
+}
+
+/// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸指针
+/// 
+/// 如果无法访问僵尸会返回 None
+pub fn get_zombie(id: i32) -> Option<*mut Zombie> {
+    get_board().and_then(|board| unsafe {
+        (*board).zombies.get_mut(id).map(|zombie| zombie as *mut Zombie)
+    })
+}
+
+/// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸并执行操作
+/// 
+/// 如果无法访问僵尸会返回错误
+pub fn with_zombie<T>(id: i32, f: impl FnOnce(&mut Zombie) -> T) -> LuaResult<T> {
+    get_zombie(id)
+        .map(|zombie| unsafe { f(&mut *zombie) })
+        .ok_or_else(|| LuaError::MemoryError(format!("Zombie({}) 不可访问", id)))
+}
 
 impl LuaUserData for Zombie {
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        // 如果僵尸被从内存里清理掉了，就给 false
+        methods.add_method("IsValid", |_, this, ()| {
+            Ok(get_zombie(this.id()).is_some())
+        });
+
+        methods.add_method("GetPos", |_, this, ()| {
+            with_zombie(this.id(), |zombie| {
+                (zombie.x, zombie.y)
+            })
+        });
+
+        methods.add_method("SetPos", |_, this, (x, y)| {
+            with_zombie(this.id(), |zombie| {
+                zombie.x = x;
+                zombie.y = y;
+            })
+        });
+    }
+
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field_mut!(fields, "id", zombie_id);
+        // 由于 UserData 给 Lua 后会锁定状态，虽然对大多数字段不合适，但 this.id 不变，太棒了
+        add_field!(fields, "id", zombie_id);
+
+        fields.add_field_method_get("body_hp", |_, this| {
+            with_zombie(this.id(), |zombie| {
+                zombie.body_hp
+            })
+        });
+
+
     }
 }
 

@@ -16,10 +16,10 @@ pub extern "stdcall" fn Constructor(
 ) -> *mut LawnApp {
     trace!("构造 LawnApp");
 
-    unsafe {
-        info!("{:?}", (0x6A9EC0 as *mut usize).is_null());
-        info!("{:?}", *(0x6A9EC0 as *mut usize));
-    }
+    // unsafe {
+        // info!("{:?}", (0x6A9EC0 as *mut usize).is_null());
+        // info!("{:?}", *(0x6A9EC0 as *mut usize));
+    // }
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(
         uninit

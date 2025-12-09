@@ -92,26 +92,7 @@ pub extern "thiscall" fn KeyDown(
     keycode: i32, 
 ) {
     trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
-
     callback(ADDR_KEYDOWN, keycode);
-
-    match keycode {
-        65 => {
-            let array = ((this as u32) + 0x90) as *mut DataArray<Zombie>;
-            // let zombie = zombie::DataArrayAlloc(
-            //     array
-            // );
-            // zombie::ZombieInitialize(
-            //     zombie,
-            //     0,
-            //     0,
-            //     false.into(),
-            //     0 as _,
-            //     0
-            // )
-        }
-        _ => (),
-    }
 
     // 回调
     ORIGINAL_KEYDOWN.wait()(
@@ -133,7 +114,6 @@ impl LuaUserData for ArgsAddZombieInRow {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         add_field_mut!(fields, "row", theRow);
         add_field_mut!(fields, "zombie_type", theZombieType);
-        
         add_field_mut!(fields, "from_wave", theFromWave);
     }
 }

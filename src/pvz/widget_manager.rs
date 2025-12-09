@@ -1,3 +1,4 @@
+pub mod widget_manager;
 
 use tracing::trace;
 
@@ -5,16 +6,9 @@ use crate::{
     hook::pvz::widget_manager::{
         KeyDownWrapper, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR
     }, 
-    pvz::lawn_app::lawn_app::LawnApp
+    pvz::{lawn_app::lawn_app::LawnApp, widget_manager::widget_manager::WidgetManager}
 };
 
-
-#[derive(Debug)]
-#[repr(C)]
-/// 这是 `WidgetManager`
-pub struct WidgetManager {
-    _pad: [u8; 0x1FC],  
-}
 
 /// 这是 `WidgetManager` 的构造函数
 pub extern "stdcall" fn Constructor(

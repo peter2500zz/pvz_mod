@@ -1,7 +1,7 @@
 
 use std::{arch::{asm, naked_asm}, sync::OnceLock};
 
-use crate::pvz::{lawn_app::lawn_app::LawnApp, widget_manager::{self, WidgetManager}};
+use crate::pvz::{lawn_app::lawn_app::LawnApp, widget_manager::{self, widget_manager::WidgetManager}};
 use super::{HookRegistration, hook};
 
 
