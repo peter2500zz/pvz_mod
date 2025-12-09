@@ -5,11 +5,10 @@ use mlua::prelude::*;
 
 use crate::{
     add_callback, add_field_mut, hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_KEYDOWN, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
     }, mods::callback::{PRE, callback, callback_data}, pvz::{
         board::board::Board, 
         coin::Coin, 
-        data_array::DataArray, 
         lawn_app::lawn_app::LawnApp, 
         zombie::zombie::Zombie
     }
@@ -54,37 +53,44 @@ pub extern "stdcall" fn InitLevel(
     ORIGINAL_INIT_LEVEL.wait()(this);
 }
 
-/// 在游戏中生成掉落物的函数
-pub extern "thiscall" fn AddCoin(
-    this: *mut Board, 
+#[repr(C)]
+pub struct ArgsAddCoin {
     theX: i32, 
     theY: i32, 
     theCoinType: u32, 
     theCoinMotion: u32
+}
+
+impl LuaUserData for ArgsAddCoin {
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        add_field_mut!(fields, "x", theX);
+        add_field_mut!(fields, "y", theY);
+        add_field_mut!(fields, "coin_type", theCoinType);
+        add_field_mut!(fields, "coin_motion", theCoinMotion);
+    }
+}
+
+/// 在游戏中生成掉落物的函数
+pub extern "thiscall" fn AddCoin(
+    this: *mut Board, 
+    args: ArgsAddCoin
 ) -> *mut Coin {
-    trace!("产生掉落物 {} at ({}, {}) with motion {}", theCoinType, theX, theY, theCoinMotion);
-    // let (
-    //     theX,
-    //     theY,
-    //     theCoinType,
-    //     theCoinMotion
-    // ) = callback(ADDR_ADDCOIN, (
-    //     theX,
-    //     theY,
-    //     theCoinType,
-    //     theCoinMotion
-    // ));
+    let mut args = args;
+
+    callback_data(PRE | ADDR_ADDCOIN, &mut args);
+    trace!("产生掉落物 {} at ({}, {}) with motion {}", args.theCoinType, args.theX, args.theY, args.theCoinMotion);
 
     let coin = ORIGINAL_ADDCOIN.wait()(
         this, 
-        theX, 
-        theY, 
-        theCoinType, 
-        theCoinMotion
+        args.theX, 
+        args.theY, 
+        args.theCoinType, 
+        args.theCoinMotion
     );
 
     coin
 }
+add_callback!("AT_NEW_COIN", PRE | ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(

@@ -1,16 +1,14 @@
 use mlua::prelude::*;
 
-use crate::pvz::lawn_app::lawn_app::get_lawn_app;
+use crate::{pvz::lawn_app::lawn_app::get_lawn_app, utils::Vec2};
 
 #[derive(Debug)]
 #[repr(C)]
 /// 这是 `WidgetManager`
 pub struct WidgetManager {
     _pad_0x0_0xE0: [u8; 0xE0 - 0x0],
-    /// 0xE0 鼠标横坐标
-    pub mouse_x: i32,
-    /// 0xE4 鼠标纵坐标
-    pub mouse_y: i32,
+    /// 0xE0 鼠标坐标
+    pub mouse_pos: Vec2<i32>,
     _pad_0xE8_0x1FC: [u8; 0x1FC - 0xE8],
 }
 const _: () = assert!(size_of::<WidgetManager>() == 0x1FC);
@@ -37,7 +35,7 @@ impl LuaUserData for WidgetManager {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetMousePos", |_, _, ()| {
             with_widget_manager(|wm| {
-                (wm.mouse_x, wm.mouse_y)
+                wm.mouse_pos
             })
         });
     }

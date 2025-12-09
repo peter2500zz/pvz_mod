@@ -3,11 +3,10 @@ use windows::core::BOOL;
 use mlua::prelude::*;
 
 use crate::{
-    add_field, 
     pvz::{
         board::board::get_board, 
         data_array::HasId
-    }
+    }, utils::{Rect2, Vec2}
 };
 
 #[repr(C)]
@@ -17,14 +16,8 @@ pub struct Zombie {
     pub base_address: *mut c_void,
     /// 0x4 当前游戏信息和对象
     pub current_game_info: *mut c_void,
-    /// 0x8 图像的横坐标
-    pub image_x: i32,
-    /// 0xC 图像的纵坐标
-    pub image_y: i32,
-    /// 0x10 受伤判定宽度基准
-    pub hit_box_width: i32,
-    /// 0x14 受伤判定高度基准
-    pub hit_box_height: i32,
+    /// 0x8 贴图尺寸
+    pub image_rect: Rect2<i32>,
     /// 0x18 为false时隐形
     pub is_visible: BOOL,
     /// 0x1C 所在行数
@@ -35,10 +28,8 @@ pub struct Zombie {
     pub zombie_type: i32,
     /// 0x28 僵尸状态
     pub zombie_state: i32,
-    /// 0x2C 横坐标
-    pub x: f32,
-    /// 0x30 纵坐标
-    pub y: f32,
+    /// 0x2C 坐标
+    pub pos: Vec2<f32>,
     /// 0x34 相对速度/僵尸水族馆中表示合速度
     pub velocity_x: f32,
     /// 0x38 不断增大直到大于[40]*[44]的值变回0
@@ -86,22 +77,10 @@ pub struct Zombie {
     pub y_offset: f32,
     /// 0x88 蹦极是否被保护伞挡住
     pub is_blocked_by_umbrella: BOOL,
-    /// 0x8C 中弹判定的横坐标
-    pub hit_box_x: i32,
-    /// 0x90 中弹判定的纵坐标
-    pub hit_box_y: i32,
-    /// 0x94 中弹判定的横向宽度
-    pub hit_box_width_check: i32,
-    /// 0x98 中弹判定的纵向高度
-    pub hit_box_height_check: i32,
-    /// 0x9C 攻击判定的横坐标
-    pub attack_box_x: i32,
-    /// 0xA0 攻击判定的纵坐标
-    pub attack_box_y: i32,
-    /// 0xA4 攻击判定的横向宽度
-    pub attack_box_width: i32,
-    /// 0xA8 攻击判定的纵向高度
-    pub attack_box_height: i32,
+    /// 0x8C 中弹判定
+    pub hitbox_rect: Rect2<i32>,
+    /// 0x9C 攻击判定
+    pub attackbox_rect: Rect2<i32>,
     /// 0xAC 减速倒计时
     pub slow_countdown: i32,
     /// 0xB0 黄油固定倒计时
@@ -127,7 +106,7 @@ pub struct Zombie {
     /// 0xC0 吃完大蒜倒计时
     pub garlic_countdown: i32,
     /// 0xC4 1类饰品(0没有1路障2铁桶3橄榄球4矿工帽7雪橇车8坚果9高坚果)
-    pub accessory1_type: i32,
+    pub helmet_type: i32,
     /// 0xC8 当前本体血量
     /// 
     /// `0x0052A52D` 如果血量小于血量上限/3且非濒死，死亡
@@ -135,19 +114,19 @@ pub struct Zombie {
     /// 0xCC 本体血量上限
     pub body_max_hp: i32,
     /// 0xD0 1类饰品当前血量
-    pub accessory1_hp: i32,
+    pub helmet_hp: i32,
     /// 0xD4 1类饰品血量上限
-    pub accessory1_max_hp: i32,
+    pub helmet_hp_max: i32,
     /// 0xD8 2类饰品
-    pub accessory2_type: i32,
+    pub shield_type: i32,
     /// 0xDC 2类饰品当前血量
-    pub accessory2_hp: i32,
+    pub shield_hp: i32,
     /// 0xE0 2类饰品血量上限
-    pub accessory2_max_hp: i32,
+    pub shield_hp_max: i32,
     /// 0xE4 气球当前血量
     pub balloon_hp: i32,
     /// 0xE8 气球血量上限
-    pub balloon_max_hp: i32,
+    pub balloon_hp_max: i32,
     /// 0xEC 消失则为true
     pub is_dead: BOOL,
     /// 0xF0 雪橇队领头僵尸ID/舞王ID
@@ -162,10 +141,8 @@ pub struct Zombie {
     pub dancer_member4_id: i32,
     /// 0x104 haveUniqueSample(翻译不过来摆烂了)
     pub have_unique_sample: BOOL,
-    /// 0x108 粒子X坐标
-    pub particle_x: i32,
-    /// 0x10C 粒子Y坐标
-    pub particle_y: i32,
+    /// 0x108 粒子坐标
+    pub particle_pos: Vec2<i32>,
     /// 0x110 受到子弹攻击的动画附件ID
     pub bullet_hit_attachment_id: i32,
     /// 0x114 僵王放僵尸倒计时/舞王召唤倒计时/僵尸水族馆生产阳光倒计时/篮球剩余数量
@@ -203,13 +180,13 @@ pub struct Zombie {
     /// 0x154 上一次穿过传送门的X坐标
     pub last_portal_x: i32,
     /// 0x158 僵尸ID(结构为[序列号,编号],序列号与编号各占2字节)
-    pub zombie_id: i32,
+    id: i32,
 }
 const _: () = assert!(size_of::<Zombie>() == 0x15C);
 
 impl HasId for Zombie {
     fn id(&self) -> i32 {
-        self.zombie_id
+        self.id
     }
 }
 
@@ -240,22 +217,20 @@ impl LuaUserData for Zombie {
 
         methods.add_method("GetPos", |_, this, ()| {
             with_zombie(this.id(), |zombie| {
-                (zombie.x, zombie.y)
+                zombie.pos
             })
         });
 
         methods.add_method("SetPos", |_, this, (x, y)| {
             with_zombie(this.id(), |zombie| {
-                zombie.x = x;
-                zombie.y = y;
+                zombie.pos.x = x;
+                zombie.pos.y = y;
             })
         });
     }
 
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         // 由于 UserData 给 Lua 后会锁定状态，虽然对大多数字段不合适，但 this.id 不变，太棒了
-        add_field!(fields, "id", zombie_id);
-
         fields.add_field_method_get("body_hp", |_, this| {
             with_zombie(this.id(), |zombie| {
                 zombie.body_hp

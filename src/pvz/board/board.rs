@@ -2,7 +2,17 @@ use std::ptr;
 
 use mlua::prelude::*;
 
-use crate::pvz::{board::{AddZombieInRow, ArgsAddZombieInRow}, data_array::DataArray, lawn_app::lawn_app::get_lawn_app, zombie::zombie::Zombie};
+use crate::pvz::{
+    board::{
+        AddCoin, 
+        AddZombieInRow, 
+        ArgsAddCoin, 
+        ArgsAddZombieInRow
+    }, 
+    data_array::DataArray, 
+    lawn_app::lawn_app::get_lawn_app, 
+    zombie::zombie::Zombie
+};
 
 
 // inventory::submit! {
@@ -67,6 +77,24 @@ impl LuaUserData for Board {
 
                 unsafe {
                     ptr::read(zombie)
+                }
+            })
+        });
+
+        methods.add_method("AddCoin", |_, _, (theX, theY, theCoinType, theCoinMotion)| {
+            with_board(|board| {
+                let coin = AddCoin(
+                    board,
+                    ArgsAddCoin {
+                        theX: theX,
+                        theY: theY,
+                        theCoinType: theCoinType,
+                        theCoinMotion: theCoinMotion,
+                    }
+                );
+
+                unsafe {
+                    ptr::read(coin)
                 }
             })
         });

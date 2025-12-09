@@ -1,7 +1,7 @@
 pub mod lawn_app;
 pub mod loading;
 
-use tracing::{debug, info, trace};
+use tracing::{debug, trace};
 
 use crate::{hook::pvz::lawn_app::{
     ORIGINAL_CONSTRUCTOR, 

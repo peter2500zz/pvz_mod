@@ -5,16 +5,10 @@ use tracing::trace;
 use windows::core::BOOL;
 
 use crate::{
-    add_callback, 
     add_field_mut, 
     hook::pvz::coin::{
-        ADDR_COIN_INITIALIZE, 
         CoinInitializeWrapper, 
         DataArrayAllocWrapper
-    }, 
-    mods::callback::{
-        PRE, 
-        callback_data
     }, 
     pvz::data_array::DataArray
 };
@@ -132,37 +126,22 @@ pub extern "stdcall" fn DataArrayAlloc(
     DataArrayAllocWrapper(this)
 }
 
-#[repr(C)]
-pub struct ArgCoinInitialize {
+pub extern "stdcall" fn CoinInitialize(
     this: *mut Coin,
     theCoinMotion: i32,
     theCoinType: i32,
     theX: i32,
     theY: i32,
-}
-
-impl LuaUserData for ArgCoinInitialize {
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field_mut!(fields, "x", theX);
-        add_field_mut!(fields, "y", theY);
-        add_field_mut!(fields, "coin_type", theCoinType);
-        add_field_mut!(fields, "coin_motion", theCoinMotion);
-    }
-}
-
-pub extern "stdcall" fn CoinInitialize(
-    args: ArgCoinInitialize
 ) {
-    let mut args = args;
-    callback_data(PRE | ADDR_COIN_INITIALIZE, &mut args);
+    // 
 
-    trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
+    // trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
     CoinInitializeWrapper(
-        args.this,
-        args.theX,
-        args.theY,
-        args.theCoinType,
-        args.theCoinMotion,
+        this,
+        theX,
+        theY,
+        theCoinType,
+        theCoinMotion,
     );
 
 
@@ -175,4 +154,3 @@ pub extern "stdcall" fn CoinInitialize(
 
     // }
 }
-add_callback!("AT_NEW_COIN", PRE | ADDR_COIN_INITIALIZE);

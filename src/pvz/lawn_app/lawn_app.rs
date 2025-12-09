@@ -2,7 +2,7 @@ use std::ptr;
 
 use mlua::prelude::*;
 
-use crate::{mods::LuaRegistration, pvz::{board::board::Board, widget_manager::widget_manager::WidgetManager}};
+use crate::{mods::LuaRegistration, pvz::{board::board::Board, widget_manager::widget_manager::WidgetManager}, utils::Vec2};
 
 const ADDR_LAWN_APP_BASE: u32 = 0x006A9EC0;
 
@@ -36,10 +36,8 @@ inventory::submit! {
 /// 手动管理生命周期并不好玩，孩子们
 pub struct LawnApp {
     _pad_0x0_0xC0: [u8; 0xC0 - 0x0],
-    /// 0xC0 窗口宽
-    pub window_width: u32,
-    /// 0xC4 窗口高
-    pub window_height: u32,
+    /// 0xC0 窗口尺寸
+    pub window_size: Vec2<u32>,
     _pad_0xC8_0x320: [u8; 0x320 - 0xC8],
     /// 0x320 控件管理器
     pub widget_manager: *mut WidgetManager,
@@ -72,7 +70,7 @@ impl LuaUserData for LawnApp {
         // 获取窗口尺寸
         methods.add_method("GetWindowSize", |_, _, ()| {
             with_lawn_app(|lawn_app| {
-                (lawn_app.window_width, lawn_app.window_height)
+                lawn_app.window_size
             })
         });
 
