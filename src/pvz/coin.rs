@@ -6,7 +6,7 @@ use windows::core::BOOL;
 
 use crate::{
     add_callback, 
-    add_field, 
+    add_field_mut, 
     hook::pvz::coin::{
         ADDR_COIN_INITIALIZE, 
         CoinInitializeWrapper, 
@@ -14,7 +14,7 @@ use crate::{
     }, 
     mods::callback::{
         PRE, 
-        callback
+        callback_data
     }, 
     pvz::data_array::DataArray
 };
@@ -116,9 +116,9 @@ impl LuaUserData for Coin {
         // // x
         // fields.add_field_method_get("x", |_, this| Ok(this.x));
         // fields.add_field_method_set("x", |_, this, val| Ok(this.x = val));
-        add_field!(fields, "x", x);
-        add_field!(fields, "y", y);
-        add_field!(fields, "coin_type", coin_type);
+        add_field_mut!(fields, "x", x);
+        add_field_mut!(fields, "y", y);
+        add_field_mut!(fields, "coin_type", coin_type);
 
     }
 }
@@ -143,10 +143,10 @@ pub struct ArgCoinInitialize {
 
 impl LuaUserData for ArgCoinInitialize {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field!(fields, "x", theX);
-        add_field!(fields, "y", theY);
-        add_field!(fields, "coin_type", theCoinType);
-        add_field!(fields, "coin_motion", theCoinMotion);
+        add_field_mut!(fields, "x", theX);
+        add_field_mut!(fields, "y", theY);
+        add_field_mut!(fields, "coin_type", theCoinType);
+        add_field_mut!(fields, "coin_motion", theCoinMotion);
     }
 }
 
@@ -154,7 +154,7 @@ pub extern "stdcall" fn CoinInitialize(
     args: ArgCoinInitialize
 ) {
     let mut args = args;
-    callback(PRE | ADDR_COIN_INITIALIZE, &mut args);
+    callback_data(PRE | ADDR_COIN_INITIALIZE, &mut args);
 
     trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
     CoinInitializeWrapper(

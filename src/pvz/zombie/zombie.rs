@@ -2,7 +2,7 @@ use std::ffi::c_void;
 use windows::core::BOOL;
 use mlua::prelude::*;
 
-use crate::add_field;
+use crate::add_field_mut;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -202,7 +202,7 @@ pub struct Zombie {
 
 impl LuaUserData for Zombie {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field!(fields, "id", zombie_id);
+        add_field_mut!(fields, "id", zombie_id);
     }
 }
 

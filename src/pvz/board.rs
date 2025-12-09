@@ -1,27 +1,17 @@
 pub mod board;
 
-use std::ffi::c_void;
-
-use tracing::{debug, trace};
+use tracing::{trace};
 use windows::core::BOOL;
 
 use crate::{
-    hook::pvz::board::{
-        ORIGINAL_ADDCOIN, 
-        ORIGINAL_CONSTRUCTOR, 
-        ORIGINAL_DESTRUCTOR, 
-        ORIGINAL_INIT_LEVEL, 
-        ORIGINAL_KEYDOWN
-    },
-    pvz::{
+    add_callback, hook::pvz::board::{
+        ADDR_KEYDOWN, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
+    }, mods::callback::callback, pvz::{
         board::board::Board, 
         coin::Coin, 
         data_array::DataArray, 
         lawn_app::lawn_app::LawnApp, 
-        zombie::{
-            self, 
-            zombie::Zombie
-        }
+        zombie::zombie::Zombie
     }
 };
 
@@ -103,6 +93,8 @@ pub extern "thiscall" fn KeyDown(
 ) {
     trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
 
+    callback(ADDR_KEYDOWN, keycode);
+
     match keycode {
         65 => {
             let array = ((this as u32) + 0x90) as *mut DataArray<Zombie>;
@@ -118,12 +110,6 @@ pub extern "thiscall" fn KeyDown(
             //     0
             // )
         }
-        90 => {
-            unsafe {
-                let board = &*this;
-                // debug!("当前阳光 {} 鼠标坐标 ({}, {})", board.sun_value, board.mouse_x, board.mouse_y);
-            }
-        }
         _ => (),
     }
 
@@ -133,3 +119,4 @@ pub extern "thiscall" fn KeyDown(
         keycode
     );
 }
+add_callback!("AT_BOARD_KEYDOWN", ADDR_KEYDOWN);

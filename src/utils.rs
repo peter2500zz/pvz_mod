@@ -1,6 +1,3 @@
-use std::sync::{Arc, Mutex};
-use tracing::error;
-
 pub mod pvz;
 
 #[macro_export]
@@ -16,12 +13,32 @@ macro_rules! pause {
     };
 }
 
-pub fn get_arc_mutex<T: std::fmt::Debug>(arc: &'_ Arc<Mutex<T>>) -> std::sync::MutexGuard<'_, T> {
-    match arc.lock() {
-        Ok(guard) => guard,
-        Err(e) => {
-            error!("{} 锁错误: {}", std::any::type_name::<T>(), e);
-            panic!("{} 锁错误: {}", std::any::type_name::<T>(), e)
-        }
-    }
+#[macro_export]
+macro_rules! add_field_mut {
+    ($fields:expr, $name:literal, $field:ident) => {
+        $fields.add_field_method_get($name, |_, this| Ok(this.$field));
+        $fields.add_field_method_set($name, |_, this, val| Ok(this.$field = val));
+    };
+    
+    // 支持多个字段
+    ($fields:expr, $( $name:literal => $field:ident ),* $(,)?) => {
+        $(
+            $fields.add_field_method_get($name, |_, this| Ok(this.$field));
+            $fields.add_field_method_set($name, |_, this, val| Ok(this.$field = val));
+        )*
+    };
+}
+
+#[macro_export]
+macro_rules! add_field {
+    ($fields:expr, $name:literal, $field:ident) => {
+        $fields.add_field_method_get($name, |_, this| Ok(this.$field));
+    };
+    
+    // 支持多个字段
+    ($fields:expr, $( $name:literal => $field:ident ),* $(,)?) => {
+        $(
+            $fields.add_field_method_get($name, |_, this| Ok(this.$field));
+        )*
+    };
 }

@@ -12,7 +12,7 @@ use crate::pvz::{
 };
 
 /// `Board` 构造函数的地址
-const ADDR_CONSTRUCTOR: u32 = 0x00407B50 as _;
+const ADDR_CONSTRUCTOR: u32 = 0x00407B50;
 /// `Board` 构造函数的签名
 type SignConstructor = extern "thiscall" fn(
     uninit: *mut Board,
@@ -22,7 +22,7 @@ type SignConstructor = extern "thiscall" fn(
 pub static ORIGINAL_CONSTRUCTOR: OnceLock<SignConstructor> = OnceLock::new();
 
 /// `Board` 析构函数的地址
-const ADDR_DESTRUCTOR: u32 = 0x00408690 as _;
+const ADDR_DESTRUCTOR: u32 = 0x00408690;
 /// `Board` 析构函数的签名
 type SignDestructor = extern "thiscall" fn(
     this: *mut Board
@@ -31,7 +31,7 @@ type SignDestructor = extern "thiscall" fn(
 pub static ORIGINAL_DESTRUCTOR: OnceLock<SignDestructor> = OnceLock::new();
 
 /// `Board::InitLevel` 的地址
-const ADDR_INIT_LEVEL: u32 = 0x0040AF90 as _;
+const ADDR_INIT_LEVEL: u32 = 0x0040AF90;
 /// `Board::InitLevel` 的签名
 type SignInitLevel = extern "stdcall" fn(
     this: *mut Board
@@ -40,7 +40,7 @@ type SignInitLevel = extern "stdcall" fn(
 pub static ORIGINAL_INIT_LEVEL: OnceLock<SignInitLevel> = OnceLock::new();
 
 /// `Board::AddCoin` 的地址
-pub const ADDR_ADDCOIN: u32 = 0x0040CB10 as _;
+pub const ADDR_ADDCOIN: u32 = 0x0040CB10;
 /// `Board::AddCoin` 的签名
 type SignAddCoin = extern "thiscall" fn(
     this: *mut Board, 
@@ -53,7 +53,7 @@ type SignAddCoin = extern "thiscall" fn(
 pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
 
 /// `Board::KeyDown` 的地址
-const ADDR_KEYDOWN: u32 = 0x0041B820 as _;
+pub const ADDR_KEYDOWN: u32 = 0x0041B820;
 /// `Board::KeyDown` 的签名
 type SignKeyDown = extern "thiscall" fn(
     this: *mut Board, 

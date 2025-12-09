@@ -1,8 +1,6 @@
-use std::{cell::UnsafeCell, ffi::c_void};
-use windows::core::BOOL;
 use mlua::prelude::*;
 
-use crate::{mods::LuaRegistration, pvz::{data_array::DataArray, lawn_app::lawn_app::get_lawn_app, zombie::zombie::Zombie}};
+use crate::pvz::lawn_app::lawn_app::get_lawn_app;
 
 
 // inventory::submit! {
@@ -31,6 +29,11 @@ pub fn get_board() -> Option<*mut Board> {
     }
 }
 
+pub fn with_board<T>(f: impl FnOnce(&mut Board) -> T) -> LuaResult<T> {
+    get_board()
+        .map(|board| unsafe { f(&mut *board) })
+        .ok_or_else(|| LuaError::MemoryError("Board 不可访问".to_string()))
+}
 
 #[derive(Debug)]
 #[repr(C)]
@@ -44,5 +47,19 @@ pub struct Board {
 const _: () = assert!(size_of::<Board>() == 0x57B0);
 
 impl LuaUserData for Board {
-    
+    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("setSun", |_, _, value: i32| {
+            with_board(|board| board.sun_value = value)
+        });
+    }
+
+    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
+        fields.add_field_method_get("sun", |_, _| {
+            with_board(|board| board.sun_value)
+        });
+
+        fields.add_field_method_set("sun", |_, _, value| {
+            with_board(|board| board.sun_value = value)
+        });
+    }
 }

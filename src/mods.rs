@@ -4,13 +4,21 @@ pub mod callback;
 
 use anyhow::{Context, Result}; // 建议引入 Context 方便报错
 use std::{
-    cell::RefCell, fs::{self, DirEntry}, path::Path, sync::{Arc, LazyLock, Mutex}
+    cell::RefCell, 
+    fs::{
+        self, 
+        DirEntry
+    }, 
+    path::Path, 
+    sync::LazyLock
 };
-use tracing::{error, info};
-use mlua::{FromLuaMulti, Lua, Result as LuaResult, Table};
+use tracing::{
+    error, 
+    info
+};
+use mlua::prelude::*;
 use regex::Regex;
 
-use crate::utils::get_arc_mutex;
 
 const MOD_DIR: &str = "mods";
 const MAIN_FILE: &str = "main.lua";
@@ -35,7 +43,7 @@ static LUA: LazyLock<RefCell<Lua>> = LazyLock::new(|| {
 
     if let Err(e) = (|| -> LuaResult<()> {
         let globals = lua.globals();
-        let package: Table = globals.get("package")?;
+        let package: LuaTable = globals.get("package")?;
 
         package.set("path", "")?;
         package.set("cpath", "")?;
@@ -115,7 +123,7 @@ fn load_mod(entry: Result<DirEntry, std::io::Error>) -> Result<()> {
         // 1. 创建沙盒环境 (Sandbox Table)
         let sandbox = lua.create_table()?;
 
-        let package: Table = lua.globals().get("package")?;
+        let package: LuaTable = lua.globals().get("package")?;
 
         package.set("path", format!(r"{path_str}\?.lua;{path_str}\?\init.lua"))?;
         package.set("cpath", format!(r"{path_str}\?.dll;{path_str}\?\loadall.dll"))?;

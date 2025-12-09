@@ -6,7 +6,7 @@ use windows::core::BOOL;
 
 use crate::{
     add_callback, 
-    add_field, 
+    add_field_mut, 
     hook::pvz::zombie::{
         ADDR_UPDATE, 
         ADDR_ZOMBIE_INITIALIZE, 
@@ -17,7 +17,7 @@ use crate::{
     mods::callback::{
         POST, 
         PRE, 
-        callback
+        callback_data
     }, 
     pvz::{
         data_array::DataArray, 
@@ -48,10 +48,10 @@ pub struct ArgsZombieInitialize {
 
 impl LuaUserData for ArgsZombieInitialize {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field!(fields, "row", theRow);
-        add_field!(fields, "zombie_type", theZombieType);
+        add_field_mut!(fields, "row", theRow);
+        add_field_mut!(fields, "zombie_type", theZombieType);
         
-        add_field!(fields, "from_wave", theFromWave);
+        add_field_mut!(fields, "from_wave", theFromWave);
     }
 }
 
@@ -59,7 +59,7 @@ pub extern "stdcall" fn ZombieInitialize(
     args: ArgsZombieInitialize
 ) {
     let mut args = args;
-    callback(PRE | ADDR_ZOMBIE_INITIALIZE, &mut args);
+    callback_data(PRE | ADDR_ZOMBIE_INITIALIZE, &mut args);
 
     trace!("初始化 行 {} 类型 {} 来自第 {} 波", args.theRow, args.theZombieType, args.theFromWave);
     ZombieInitializeWrapper(
@@ -73,7 +73,7 @@ pub extern "stdcall" fn ZombieInitialize(
     unsafe {
         let zombie = &mut *args.this;
 
-        callback(POST | ADDR_ZOMBIE_INITIALIZE, zombie);
+        callback_data(POST | ADDR_ZOMBIE_INITIALIZE, zombie);
     }
 }
 add_callback!("AT_NEW_ZOMBIE", PRE | ADDR_ZOMBIE_INITIALIZE);
@@ -86,7 +86,7 @@ pub extern "stdcall" fn Update(
     unsafe {
         let zombie = &mut *this;
 
-        callback(PRE | ADDR_UPDATE, zombie);
+        callback_data(PRE | ADDR_UPDATE, zombie);
     }
     UpdateWrapper(this);
 }
