@@ -2,6 +2,8 @@ use std::fmt::Debug;
 
 use mlua::prelude::*;
 
+use crate::mods::LuaRegistration;
+
 
 #[macro_export]
 macro_rules! pause {
@@ -44,6 +46,25 @@ macro_rules! add_field {
             $fields.add_field_method_get($name, |_, this| Ok(this.$field));
         )*
     };
+}
+
+inventory::submit! {
+    LuaRegistration(|lua| {
+        let globals = lua.globals();
+
+        let new_vec2 = lua.create_function(|_, (x, y)| {
+            Ok(Vec2::<f64>::new(x, y))
+        })?;
+
+        let new_rect2 = lua.create_function(|_, (x, y, width, height)| {
+            Ok(Rect2::<f64>::new(x, y, width, height))
+        })?;
+
+        globals.set("NewVec2", new_vec2)?;
+        globals.set("NewRect2", new_rect2)?;
+
+        Ok(())
+    })
 }
 
 #[repr(C)]

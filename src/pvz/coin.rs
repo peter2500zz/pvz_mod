@@ -8,7 +8,7 @@ use crate::{
     add_field_mut, hook::pvz::coin::{
         CoinInitializeWrapper, 
         DataArrayAllocWrapper
-    }, mods::LuaRegistration, pvz::data_array::DataArray
+    }, mods::LuaRegistration, pvz::data_array::DataArray, utils::{Rect2, Vec2}
 };
 
 
@@ -18,28 +18,18 @@ pub struct Coin {
     pub base_address: *mut c_void,
     /// 0x4 当前游戏信息和对象
     pub current_game_info: *mut c_void,
-    /// 0x8 图像X坐标变化量
-    pub image_x_offset: i32,
-    /// 0xC 图像Y坐标变化量
-    pub image_y_offset: i32,
-    /// 0x10 判定宽度
-    pub hit_box_width: i32,
-    /// 0x14 判定高度
-    pub hit_box_height: i32,
+    /// 0x8 碰撞箱
+    pub hitbox: Rect2<i32>,
     /// 0x18 true则物品隐形
     pub is_invisible: BOOL,
     /// 0x1C 所在行数
     pub row: i32,
     /// 0x20 图层
     pub layer: i32,
-    /// 0x24 X坐标
-    pub x: f32,
-    /// 0x28 Y坐标
-    pub y: f32,
-    /// 0x2C X坐标变化量
-    pub velocity_x: f32,
-    /// 0x30 Y坐标变化量
-    pub velocity_y: f32,
+    /// 0x24 坐标
+    pub pos: Vec2<f32>,
+    /// 0x2C 坐标变化量
+    pub velocity: Vec2<f32>,
     /// 0x34 大小
     pub scale: f32,
     /// 0x38 true则物品消失
@@ -87,7 +77,7 @@ pub struct Coin {
 
 inventory::submit! {
     LuaRegistration(|lua| {
-        let global = lua.globals();
+        let globals = lua.globals();
         let coin_types = lua.create_table()?;
 
         coin_types.set("SILVER_COIN", 1)?;  // 银币
@@ -118,7 +108,7 @@ inventory::submit! {
         coin_types.set("GIFT_BOX_PUZZLE", 26)?;  // 礼品盒(解密模式)
         coin_types.set("GIFT_BOX_SURVIVAL", 27)?;  // 礼品盒(生存模式)
 
-        global.set("CoinTypes", coin_types)?;
+        globals.set("CoinTypes", coin_types)?;
 
         let coin_motions = lua.create_table()?;
 
@@ -131,7 +121,7 @@ inventory::submit! {
         coin_motions.set("POP_FROM_RIGHT", 6)?;  // 从屏幕右侧蹦出
         coin_motions.set("SPAWN_IN_SEED_SLOT", 7)?;  // 在卡槽栏生成
 
-        global.set("CoinMotions", coin_motions)?;
+        globals.set("CoinMotions", coin_motions)?;
 
         Ok(())
     })
@@ -142,8 +132,7 @@ impl LuaUserData for Coin {
         // // x
         // fields.add_field_method_get("x", |_, this| Ok(this.x));
         // fields.add_field_method_set("x", |_, this, val| Ok(this.x = val));
-        add_field_mut!(fields, "x", x);
-        add_field_mut!(fields, "y", y);
+
         add_field_mut!(fields, "coin_type", coin_type);
 
     }

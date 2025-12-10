@@ -136,6 +136,28 @@ pub extern "stdcall" fn AddZombieInRowWrapper(
     }
 }
 
+/// `Board::MouseDown` 的地址
+pub const ADDR_MOUSE_DOWN: u32 = 0x00411F20;
+/// `Board::KeyDown` 的签名
+type SignMouseDown = extern "thiscall" fn(
+    this: *mut Board, 
+    pos: Vec2<i32>,
+    theClickCount: i32,
+);
+/// `Board::MouseDown` 的跳板
+pub static ORIGINAL_MOUSE_DOWN: OnceLock<SignMouseDown> = OnceLock::new();
+
+/// `Board::MouseUp` 的地址
+pub const ADDR_MOUSE_UP: u32 = 0x00412540;
+/// `Board::MouseUp` 的签名
+type SignMouseUp = extern "thiscall" fn(
+    this: *mut Board, 
+    pos: Vec2<i32>,
+    theClickCount: i32,
+);
+/// `Board::MouseUp` 的跳板
+pub static ORIGINAL_MOUSE_UP: OnceLock<SignMouseUp> = OnceLock::new();
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CONSTRUCTOR.set(
@@ -160,6 +182,14 @@ inventory::submit! {
 
         let _ = ORIGINAL_ADD_ZOMBIE_IN_ROW.set(
             hook(ADDR_ADD_ZOMBIE_IN_ROW as _, AddZombieInRowHelper as _)?
+        );
+
+        let _ = ORIGINAL_MOUSE_DOWN.set(
+            hook(ADDR_MOUSE_DOWN as _, board::MouseDown as _)?
+        );
+
+        let _ = ORIGINAL_MOUSE_UP.set(
+            hook(ADDR_MOUSE_UP as _, board::MouseUp as _)?
         );
 
         Ok(())

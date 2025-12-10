@@ -5,7 +5,7 @@ use mlua::prelude::*;
 
 use crate::{
     add_callback, add_field_mut, hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP
     }, mods::callback::{PRE, callback, callback_data}, pvz::{
         board::board::Board, 
         coin::Coin, 
@@ -13,6 +13,7 @@ use crate::{
         zombie::zombie::Zombie
     }, utils::Vec2
 };
+
 
 /// 这是 `Board` 的构造函数
 pub extern "thiscall" fn Constructor(
@@ -115,7 +116,7 @@ pub extern "thiscall" fn KeyDown(
     keycode: i32, 
 ) {
     trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
-    callback(ADDR_KEYDOWN, keycode);
+    callback(PRE | ADDR_KEYDOWN, keycode);
 
     // 回调
     ORIGINAL_KEYDOWN.wait()(
@@ -123,7 +124,7 @@ pub extern "thiscall" fn KeyDown(
         keycode
     );
 }
-add_callback!("AT_BOARD_KEYDOWN", ADDR_KEYDOWN);
+add_callback!("AT_BOARD_KEY_DOWN", PRE | ADDR_KEYDOWN);
 
 #[repr(C)]
 pub struct ArgsAddZombieInRow {
@@ -161,3 +162,35 @@ pub extern "stdcall" fn AddZombieInRow(
     )
 }
 add_callback!("AT_NEW_ZOMBIE", PRE | ADDR_ADD_ZOMBIE_IN_ROW);
+
+pub extern "thiscall" fn MouseDown(
+    this: *mut Board, 
+    pos: Vec2<i32>,
+    theClickCount: i32,
+) {
+    trace!("Board({:#x?}) 在 {:?} 点击 {}", this, pos, theClickCount);
+    callback(PRE | ADDR_MOUSE_DOWN, (theClickCount, pos));
+
+    ORIGINAL_MOUSE_DOWN.wait()(
+        this,
+        pos,
+        theClickCount
+    )
+}
+add_callback!("AT_BOARD_MOUSE_DOWN", PRE | ADDR_MOUSE_DOWN);
+
+pub extern "thiscall" fn MouseUp(
+    this: *mut Board, 
+    pos: Vec2<i32>,
+    theClickCount: i32,
+) {
+    trace!("Board({:#x?}) 在 {:?} 松开 {}", this, pos, theClickCount);
+    callback(PRE | ADDR_MOUSE_UP, (theClickCount, pos));
+
+    ORIGINAL_MOUSE_UP.wait()(
+        this,
+        pos,
+        theClickCount
+    )
+}
+add_callback!("AT_BOARD_MOUSE_UP", PRE | ADDR_MOUSE_UP);

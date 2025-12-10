@@ -56,6 +56,7 @@ pub extern "stdcall" fn KeyDownWrapper(this: *mut WidgetManager, key: i32) -> u8
         let result: u32;
         asm!(
             // 把参数放入原函数期望的寄存器中
+            // 函数不清栈就得我们清了
             "mov ecx, {key}",
             "mov eax, {this}",
             // 调用原函数

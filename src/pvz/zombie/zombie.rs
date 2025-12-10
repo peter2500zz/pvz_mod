@@ -221,10 +221,9 @@ impl LuaUserData for Zombie {
             })
         });
 
-        methods.add_method("SetPos", |_, this, (x, y)| {
+        methods.add_method("SetPos", |_, this, pos| {
             with_zombie(this.id(), |zombie| {
-                zombie.pos.x = x;
-                zombie.pos.y = y;
+                zombie.pos = pos;
             })
         });
     }
