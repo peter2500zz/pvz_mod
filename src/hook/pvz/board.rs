@@ -1,41 +1,37 @@
-
-use std::{arch::{asm, naked_asm}, sync::OnceLock};
+use std::{
+    arch::{asm, naked_asm},
+    sync::OnceLock,
+};
 
 use super::{HookRegistration, hook};
-use crate::{pvz::{
-    board::{
-        self, 
-        board::Board
-    }, 
-    coin::Coin, 
-    lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie
-}, utils::Vec2};
+use crate::{
+    pvz::{
+        board::{self, board::Board},
+        coin::Coin,
+        lawn_app::lawn_app::LawnApp,
+        zombie::zombie::Zombie,
+    },
+    utils::Vec2,
+};
 
 /// `Board` 构造函数的地址
 const ADDR_CONSTRUCTOR: u32 = 0x00407B50;
 /// `Board` 构造函数的签名
-type SignConstructor = extern "thiscall" fn(
-    uninit: *mut Board,
-    theApp: *mut LawnApp,
-) -> *mut Board;
+type SignConstructor = extern "thiscall" fn(uninit: *mut Board, theApp: *mut LawnApp) -> *mut Board;
 /// `Board` 构造函数的跳板
 pub static ORIGINAL_CONSTRUCTOR: OnceLock<SignConstructor> = OnceLock::new();
 
 /// `Board` 析构函数的地址
 const ADDR_DESTRUCTOR: u32 = 0x00408690;
 /// `Board` 析构函数的签名
-type SignDestructor = extern "thiscall" fn(
-    this: *mut Board
-);
+type SignDestructor = extern "thiscall" fn(this: *mut Board);
 /// `Board` 析构函数的跳板
 pub static ORIGINAL_DESTRUCTOR: OnceLock<SignDestructor> = OnceLock::new();
 
 /// `Board::InitLevel` 的地址
 const ADDR_INIT_LEVEL: u32 = 0x0040AF90;
 /// `Board::InitLevel` 的签名
-type SignInitLevel = extern "stdcall" fn(
-    this: *mut Board
-);
+type SignInitLevel = extern "stdcall" fn(this: *mut Board);
 /// `Board::InitLevel` 的跳板
 pub static ORIGINAL_INIT_LEVEL: OnceLock<SignInitLevel> = OnceLock::new();
 
@@ -43,10 +39,10 @@ pub static ORIGINAL_INIT_LEVEL: OnceLock<SignInitLevel> = OnceLock::new();
 pub const ADDR_ADDCOIN: u32 = 0x0040CB10;
 /// `Board::AddCoin` 的签名
 type SignAddCoin = extern "thiscall" fn(
-    this: *mut Board, 
+    this: *mut Board,
     pos: Vec2<i32>,
-    theCoinType: u32, 
-    theCoinMotion: u32
+    theCoinType: u32,
+    theCoinMotion: u32,
 ) -> *mut Coin;
 /// `Board::AddCoin` 的跳板
 pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
@@ -54,10 +50,7 @@ pub static ORIGINAL_ADDCOIN: OnceLock<SignAddCoin> = OnceLock::new();
 /// `Board::KeyDown` 的地址
 pub const ADDR_KEYDOWN: u32 = 0x0041B820;
 /// `Board::KeyDown` 的签名
-type SignKeyDown = extern "thiscall" fn(
-    this: *mut Board, 
-    keycode: i32,
-);
+type SignKeyDown = extern "thiscall" fn(this: *mut Board, keycode: i32);
 /// `Board::KeyDown` 的跳板
 pub static ORIGINAL_KEYDOWN: OnceLock<SignKeyDown> = OnceLock::new();
 
@@ -65,7 +58,7 @@ pub static ORIGINAL_KEYDOWN: OnceLock<SignKeyDown> = OnceLock::new();
 pub const ADDR_ADD_ZOMBIE_IN_ROW: u32 = 0x0040DDC0;
 /// `Board::AddZombieInRow` 的签名
 type SignAddZombieInRow = extern "stdcall" fn(
-    this: *mut Board, 
+    this: *mut Board,
     theZombieType: i32,
     theRow: i32,
     theFromWave: i32,
@@ -100,7 +93,7 @@ extern "stdcall" fn AddZombieInRowHelper() {
 
 /// 回调辅助函数
 pub extern "stdcall" fn AddZombieInRowWrapper(
-    this: *mut Board, 
+    this: *mut Board,
     theZombieType: i32,
     theRow: i32,
     theFromWave: i32,
@@ -108,9 +101,7 @@ pub extern "stdcall" fn AddZombieInRowWrapper(
     // 获取原函数的指针
     let func = ORIGINAL_ADD_ZOMBIE_IN_ROW.wait();
     unsafe {
-        asm!(
-            "push ebx"
-        );
+        asm!("push ebx");
         asm!(
             // 压参数
             "push {}",
@@ -129,9 +120,7 @@ pub extern "stdcall" fn AddZombieInRowWrapper(
             func = in(reg) func,
             zombie = out(reg) zombie
         );
-        asm!(
-            "pop ebx"
-        );
+        asm!("pop ebx");
         zombie
     }
 }
@@ -139,24 +128,23 @@ pub extern "stdcall" fn AddZombieInRowWrapper(
 /// `Board::MouseDown` 的地址
 pub const ADDR_MOUSE_DOWN: u32 = 0x00411F20;
 /// `Board::KeyDown` 的签名
-type SignMouseDown = extern "thiscall" fn(
-    this: *mut Board, 
-    pos: Vec2<i32>,
-    theClickCount: i32,
-);
+type SignMouseDown = extern "thiscall" fn(this: *mut Board, pos: Vec2<i32>, theClickCount: i32);
 /// `Board::MouseDown` 的跳板
 pub static ORIGINAL_MOUSE_DOWN: OnceLock<SignMouseDown> = OnceLock::new();
 
 /// `Board::MouseUp` 的地址
 pub const ADDR_MOUSE_UP: u32 = 0x00412540;
 /// `Board::MouseUp` 的签名
-type SignMouseUp = extern "thiscall" fn(
-    this: *mut Board, 
-    pos: Vec2<i32>,
-    theClickCount: i32,
-);
+type SignMouseUp = extern "thiscall" fn(this: *mut Board, pos: Vec2<i32>, theClickCount: i32);
 /// `Board::MouseUp` 的跳板
 pub static ORIGINAL_MOUSE_UP: OnceLock<SignMouseUp> = OnceLock::new();
+
+/// `Board::Update` 的地址
+pub const ADDR_UPDATE: u32 = 0x00415D40;
+/// `Board::Update` 的签名
+type SignUpdate = extern "thiscall" fn(this: *mut Board);
+/// `Board::Update` 的跳板
+pub static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 
 inventory::submit! {
     HookRegistration(|| {
@@ -190,6 +178,10 @@ inventory::submit! {
 
         let _ = ORIGINAL_MOUSE_UP.set(
             hook(ADDR_MOUSE_UP as _, board::MouseUp as _)?
+        );
+
+        let _ = ORIGINAL_UPDATE.set(
+            hook(ADDR_UPDATE as _, board::Update as _)?
         );
 
         Ok(())

@@ -1,16 +1,14 @@
-
-use std::ffi::c_void;
 use mlua::prelude::*;
+use std::ffi::c_void;
 use tracing::trace;
 use windows::core::BOOL;
 
 use crate::{
-    add_field_mut, hook::pvz::coin::{
-        CoinInitializeWrapper, 
-        DataArrayAllocWrapper
-    }, mods::LuaRegistration, pvz::data_array::DataArray, utils::{Rect2, Vec2}
+    add_field_mut,
+    hook::pvz::coin::{CoinInitializeWrapper, DataArrayAllocWrapper},
+    mods::LuaRegistration,
+    utils::{Rect2, Vec2, data_array::DataArray},
 };
-
 
 #[repr(C)]
 pub struct Coin {
@@ -134,14 +132,11 @@ impl LuaUserData for Coin {
         // fields.add_field_method_set("x", |_, this, val| Ok(this.x = val));
 
         add_field_mut!(fields, "coin_type", coin_type);
-
     }
 }
 
 /// `DataArray::DataArrayAlloc` 的 hook 函数
-pub extern "stdcall" fn DataArrayAlloc(
-    this: *mut DataArray<Coin>,
-) -> *mut Coin {
+pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Coin>) -> *mut Coin {
     trace!("alloc coin");
     DataArrayAllocWrapper(this)
 }
@@ -153,17 +148,10 @@ pub extern "stdcall" fn CoinInitialize(
     theX: i32,
     theY: i32,
 ) {
-    // 
+    //
 
     // trace!("初始化 类型 {} 运动方式 {} 位置 ({}, {})", args.theCoinType, args.theCoinMotion, args.theX, args.theY);
-    CoinInitializeWrapper(
-        this,
-        theX,
-        theY,
-        theCoinType,
-        theCoinMotion,
-    );
-
+    CoinInitializeWrapper(this, theX, theY, theCoinType, theCoinMotion);
 
     // // callback_mut(ADDR_COIN_INITIALIZE, );
 

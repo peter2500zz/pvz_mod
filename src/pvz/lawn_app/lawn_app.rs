@@ -2,7 +2,11 @@ use std::ptr;
 
 use mlua::prelude::*;
 
-use crate::{mods::LuaRegistration, pvz::{board::board::Board, widget_manager::widget_manager::WidgetManager}, utils::Vec2};
+use crate::{
+    mods::LuaRegistration,
+    pvz::{board::board::Board, widget_manager::widget_manager::WidgetManager},
+    utils::Vec2,
+};
 
 const ADDR_LAWN_APP_BASE: u32 = 0x006A9EC0;
 
@@ -32,7 +36,7 @@ inventory::submit! {
 #[derive(Debug)]
 #[repr(C)]
 /// 这是 `LawnApp`
-/// 
+///
 /// 手动管理生命周期并不好玩，孩子们
 pub struct LawnApp {
     _pad_0x0_0xC0: [u8; 0xC0 - 0x0],
@@ -59,18 +63,14 @@ pub fn get_lawn_app() -> LuaResult<*mut LawnApp> {
 }
 
 pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> LuaResult<T>) -> LuaResult<T> {
-    get_lawn_app()
-        .and_then(|lawn_app| unsafe { f(&mut *lawn_app) })
+    get_lawn_app().and_then(|lawn_app| unsafe { f(&mut *lawn_app) })
 }
-
 
 impl LuaUserData for LawnApp {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         // 获取窗口尺寸
         methods.add_method("GetWindowSize", |_, _, ()| {
-            with_lawn_app(|lawn_app| {
-                Ok(lawn_app.window_size)
-            })
+            with_lawn_app(|lawn_app| Ok(lawn_app.window_size))
         });
 
         // 获取关卡

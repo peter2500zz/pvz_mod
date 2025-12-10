@@ -1,10 +1,9 @@
-pub mod lawn_app;
-pub mod debug;
 pub mod board;
+pub mod coin;
+pub mod debug;
+pub mod lawn_app;
 pub mod widget_manager;
 pub mod zombie;
-pub mod data_array;
-pub mod coin;
 
 use tracing::{debug, info};
 use windows::{

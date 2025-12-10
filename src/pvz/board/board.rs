@@ -2,18 +2,18 @@ use std::ptr;
 
 use mlua::prelude::*;
 
-use crate::{mods::LuaRegistration, pvz::{
-    board::{
-        AddCoin, 
-        AddZombieInRow, 
-        ArgsAddCoin, 
-        ArgsAddZombieInRow
-    }, 
-    data_array::{DataArray, HasId}, 
-    lawn_app::lawn_app::get_lawn_app, 
-    zombie::zombie::Zombie
-}};
-
+use crate::{
+    mods::LuaRegistration,
+    pvz::{
+        board::{AddCoin, AddZombieInRow, ArgsAddCoin, ArgsAddZombieInRow},
+        lawn_app::lawn_app::get_lawn_app,
+        zombie::zombie::Zombie,
+    },
+    utils::{
+        data_array::{DataArray, HasId},
+        delta_mgr::get_delta_mgr,
+    },
+};
 
 // inventory::submit! {
 //     LuaRegistration(|lua| {
@@ -75,12 +75,15 @@ pub fn get_board() -> LuaResult<*mut Board> {
 }
 
 pub fn with_board<T>(f: impl FnOnce(&mut Board) -> LuaResult<T>) -> LuaResult<T> {
-    get_board()
-        .and_then(|board| unsafe { f(&mut *board) })
+    get_board().and_then(|board| unsafe { f(&mut *board) })
 }
 
 impl LuaUserData for Board {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("GetDelta", |_, _, ()| {
+            Ok(get_delta_mgr().get_delta("Board").unwrap_or_default())
+        });
+
         methods.add_method("MousePressing", |_, _, ()| {
             with_board(|board| Ok(board.mouse_pressing))
         });
@@ -106,9 +109,7 @@ impl LuaUserData for Board {
         methods.add_method("GetZombieById", |lua, _, id| {
             with_board(|board| {
                 if let Some(zombie) = board.zombies.get_ptr(id) {
-                    unsafe {
-                        Ok(LuaValue::UserData(lua.create_userdata(ptr::read(zombie))?))
-                    }
+                    unsafe { Ok(LuaValue::UserData(lua.create_userdata(ptr::read(zombie))?)) }
                 } else {
                     Ok(LuaNil)
                 }
@@ -124,9 +125,7 @@ impl LuaUserData for Board {
                     theRow: row,
                 });
 
-                unsafe {
-                    Ok(ptr::read(zombie))
-                }
+                unsafe { Ok(ptr::read(zombie)) }
             })
         });
 
@@ -138,20 +137,16 @@ impl LuaUserData for Board {
                         pos,
                         theCoinType: theCoinType,
                         theCoinMotion: theCoinMotion,
-                    }
+                    },
                 );
 
-                unsafe {
-                    Ok(ptr::read(coin))
-                }
+                unsafe { Ok(ptr::read(coin)) }
             })
         });
     }
 
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        fields.add_field_method_get("sun", |_, _| {
-            with_board(|board| Ok(board.sun_value))
-        });
+        fields.add_field_method_get("sun", |_, _| with_board(|board| Ok(board.sun_value)));
 
         fields.add_field_method_set("sun", |_, _, value| {
             with_board(|board| Ok(board.sun_value = value))

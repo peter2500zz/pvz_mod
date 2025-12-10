@@ -1,15 +1,18 @@
+use std::{
+    arch::{asm, naked_asm},
+    sync::OnceLock,
+};
 
-use std::{arch::{asm, naked_asm}, sync::OnceLock};
-
-use crate::pvz::{coin::{self, Coin}, data_array::DataArray};
 use super::{HookRegistration, hook};
+use crate::{
+    pvz::coin::{self, Coin},
+    utils::data_array::DataArray,
+};
 
 /// `DataArray<Coin>::DataArrayAlloc` 构造函数的地址
 const ADDR_DATA_ARRAY_ALLOC: u32 = 0x0041E040;
 /// `DataArray<Coin>::DataArrayAlloc` 构造函数的签名
-type SignDataArrayAlloc = fn(
-    this: *mut DataArray<Coin>,
-) -> *mut Coin;
+type SignDataArrayAlloc = fn(this: *mut DataArray<Coin>) -> *mut Coin;
 /// `DataArray<Coin>::DataArrayAlloc` 构造函数的跳板
 static ORIGINAL_DATA_ARRAY_ALLOC: OnceLock<SignDataArrayAlloc> = OnceLock::new();
 
@@ -30,9 +33,7 @@ extern "stdcall" fn DataArrayAllocHelper() {
 }
 
 /// 回调辅助函数
-pub extern "stdcall" fn DataArrayAllocWrapper(
-    this: *mut DataArray<Coin>, 
-) -> *mut Coin {
+pub extern "stdcall" fn DataArrayAllocWrapper(this: *mut DataArray<Coin>) -> *mut Coin {
     unsafe {
         let result;
         asm!(
@@ -58,15 +59,10 @@ pub extern "stdcall" fn DataArrayAllocWrapper(
 /// `Coin::CoinInitialize` 的地址
 pub const ADDR_COIN_INITIALIZE: u32 = 0x0042FF60;
 /// `Coin::CoinInitialize` 的签名
-/// 
+///
 /// 仅标注用
-type SignCoinInitialize = fn(
-    this: *mut Coin,
-    theX: i32,
-    theY: i32,
-    theCoinType: i32,
-    theCoinMotion: i32,
-);
+type SignCoinInitialize =
+    fn(this: *mut Coin, theX: i32, theY: i32, theCoinType: i32, theCoinMotion: i32);
 /// `Coin::CoinInitialize` 的跳板
 static ORIGINAL_COIN_INITIALIZE: OnceLock<SignCoinInitialize> = OnceLock::new();
 
@@ -125,7 +121,6 @@ pub extern "stdcall" fn CoinInitializeWrapper(
         );
     }
 }
-
 
 inventory::submit! {
     HookRegistration(|| {

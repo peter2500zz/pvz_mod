@@ -1,12 +1,10 @@
+use mlua::prelude::*;
 use std::ffi::c_void;
 use windows::core::BOOL;
-use mlua::prelude::*;
 
 use crate::{
-    pvz::{
-        board::board::get_board, 
-        data_array::HasId
-    }, utils::{Rect2, Vec2}
+    pvz::board::board::get_board,
+    utils::{Rect2, Vec2, data_array::HasId},
 };
 
 #[repr(C)]
@@ -108,7 +106,7 @@ pub struct Zombie {
     /// 0xC4 1类饰品(0没有1路障2铁桶3橄榄球4矿工帽7雪橇车8坚果9高坚果)
     pub helmet_type: i32,
     /// 0xC8 当前本体血量
-    /// 
+    ///
     /// `0x0052A52D` 如果血量小于血量上限/3且非濒死，死亡
     pub body_hp: i32,
     /// 0xCC 本体血量上限
@@ -191,7 +189,7 @@ impl HasId for Zombie {
 }
 
 /// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸指针
-/// 
+///
 /// 如果无法访问僵尸会返回 None
 pub fn get_zombie(id: i32) -> LuaResult<*mut Zombie> {
     get_board().and_then(|board| unsafe {
@@ -204,19 +202,16 @@ pub fn get_zombie(id: i32) -> LuaResult<*mut Zombie> {
 }
 
 /// 尝试通过索引从 Board 中的 zombies 对象池中获取僵尸并执行操作
-/// 
+///
 /// 如果无法访问僵尸会返回错误
 pub fn with_zombie<T>(id: i32, f: impl FnOnce(&mut Zombie) -> LuaResult<T>) -> LuaResult<T> {
-    get_zombie(id)
-        .and_then(|zombie| unsafe { f(&mut *zombie) })
+    get_zombie(id).and_then(|zombie| unsafe { f(&mut *zombie) })
 }
 
 impl LuaUserData for Zombie {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         // 如果僵尸被从内存里清理掉了，就给 false
-        methods.add_method("IsValid", |_, this, ()| {
-            Ok(get_zombie(this.id()).is_ok())
-        });
+        methods.add_method("IsValid", |_, this, ()| Ok(get_zombie(this.id()).is_ok()));
 
         methods.add_method("GetPos", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.pos))
@@ -240,9 +235,5 @@ impl LuaUserData for Zombie {
         fields.add_field_method_get("body_hp", |_, this| {
             with_zombie(this.id(), |zombie| Ok(zombie.body_hp))
         });
-
-
     }
 }
-
-

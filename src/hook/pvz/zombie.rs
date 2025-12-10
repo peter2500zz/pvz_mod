@@ -1,16 +1,19 @@
-
-use std::{arch::{asm, naked_asm}, sync::OnceLock};
+use std::{
+    arch::{asm, naked_asm},
+    sync::OnceLock,
+};
 use windows::core::BOOL;
 
-use crate::pvz::{data_array::DataArray, zombie::{self, zombie::Zombie}};
 use super::{HookRegistration, hook};
+use crate::{
+    pvz::zombie::{self, zombie::Zombie},
+    utils::data_array::DataArray,
+};
 
 /// `DataArray<Zombie>::DataArrayAlloc` 构造函数的地址
 const ADDR_DATA_ARRAY_ALLOC: u32 = 0x0041DDA0;
 /// `DataArray<Zombie>::DataArrayAlloc` 构造函数的签名
-type SignDataArrayAlloc = fn(
-    this: *mut DataArray<Zombie>,
-) -> *mut Zombie;
+type SignDataArrayAlloc = fn(this: *mut DataArray<Zombie>) -> *mut Zombie;
 /// `DataArray<Zombie>::DataArrayAlloc` 构造函数的跳板
 static ORIGINAL_DATA_ARRAY_ALLOC: OnceLock<SignDataArrayAlloc> = OnceLock::new();
 
@@ -31,9 +34,7 @@ extern "stdcall" fn DataArrayAllocHelper() {
 }
 
 /// 回调辅助函数
-pub extern "stdcall" fn DataArrayAllocWrapper(
-    this: *mut DataArray<Zombie>, 
-) -> *mut Zombie {
+pub extern "stdcall" fn DataArrayAllocWrapper(this: *mut DataArray<Zombie>) -> *mut Zombie {
     unsafe {
         let result;
         asm!(
@@ -59,7 +60,7 @@ pub extern "stdcall" fn DataArrayAllocWrapper(
 /// `Zombie::ZombieInitialize` 的地址
 pub const ADDR_ZOMBIE_INITIALIZE: u32 = 0x00522580;
 /// `Zombie::ZombieInitialize` 的签名
-/// 
+///
 /// 仅标注用
 type SignZombieInitialize = fn(
     this: *mut Zombie,
@@ -128,9 +129,7 @@ pub extern "stdcall" fn ZombieInitializeWrapper(
 /// `Zombie::Update` 构造函数的地址
 pub const ADDR_UPDATE: u32 = 0x0052AE60;
 /// `Zombie::Update` 构造函数的签名
-type SignUpdate = fn(
-    this: *mut Zombie,
-);
+type SignUpdate = fn(this: *mut Zombie);
 /// `Zombie::Update` 构造函数的跳板
 static ORIGINAL_UPDATE: OnceLock<SignUpdate> = OnceLock::new();
 
@@ -151,9 +150,7 @@ extern "stdcall" fn UpdateHelper() {
 }
 
 /// 回调辅助函数
-pub extern "stdcall" fn UpdateWrapper(
-    this: *mut Zombie, 
-) {
+pub extern "stdcall" fn UpdateWrapper(this: *mut Zombie) {
     unsafe {
         asm!(
             // 把参数放入原函数期望的寄存器中

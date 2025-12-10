@@ -70,6 +70,7 @@
     ---字段
     ---@field sun integer @关卡内的阳光值
     ---方法
+    ---@field GetDelta fun(self): number @获取距离上一帧的时间
     ---@field MousePressing fun(self): boolean @鼠标是否按住（暂停不记录）
     ---@field SetSun fun(self, value: integer) @设置关卡的阳光值
     ---@field GetZombies fun(self): table<integer, Zombie> @返回场上所有僵尸
@@ -110,6 +111,7 @@
 ---枚举
     ---@class ModCallbacks @回调点
     ---游戏关卡分类
+    ---@field AT_BOARD_UPDATE integer @游戏关卡更新, fun(delta: number): nil
     ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下, fun(keycode: integer): nil
     ---@field AT_BOARD_MOUSE_DOWN integer @游戏关卡内鼠标点击, fun(mousecode: integer, pos: Vec2): nil
     ---@field AT_BOARD_MOUSE_UP integer @游戏关卡内鼠标松开, fun(mousecode: integer, pos: Vec2): nil
@@ -356,4 +358,11 @@
     ---@field ERASE_EOF integer @ERASE EOF 键
     ---@field PLAY integer @PLAY 键
     ---@field ZOOM integer @ZOOM 键
-    ---@field NO_NAME integer @保留供将�
+    ---@field NO_NAME integer @保留供将来使用的常量
+    ---@field PA1 integer @PA1 键
+    ---@field OEM_CLEAR integer @CLEAR 键
+    ---@field CODE integer @用于从键值中提取键码的位掩码
+    ---@field SHIFT integer @SHIFT 修饰键
+    ---@field CONTROL integer @CTRL 修饰键
+    ---@field ALT integer @ALT 修饰键
+    KeyCodes = {}

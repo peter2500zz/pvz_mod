@@ -1,6 +1,5 @@
-use std::os::raw::c_char;
 use std::marker::PhantomData;
-
+use std::os::raw::c_char;
 
 pub trait HasId {
     /// 获取对象的当前 ID
@@ -30,7 +29,7 @@ pub struct DataArray<T> {
 
 impl<T: HasId> DataArray<T> {
     /// 复刻 DataArray_Zombie_::DataArrayTryToGet
-    /// 
+    ///
     /// # Logic
     /// int __fastcall TryToGet(int id, DataArray *this)
     /// {
@@ -57,7 +56,7 @@ impl<T: HasId> DataArray<T> {
             if index >= self.max_capacity as isize {
                 return None;
             }
-            
+
             // 额外安全检查：防止 block 为空
             if self.block.is_null() {
                 return None;
@@ -66,7 +65,7 @@ impl<T: HasId> DataArray<T> {
             // 计算目标地址
             // 汇编: *a2 + 348 * (unsigned __int16)a1
             let element_ptr = self.block.offset(index);
-            
+
             // ---------------------------------------------------------
             // 核心逻辑: 版本号校验
             // 汇编: ... + 344) != a1 ? 0 : ...
@@ -243,7 +242,7 @@ impl<T: HasId> DataArray<T> {
             _marker: PhantomData,
         }
     }
-    
+
     /// 如果你非常坚持要“裸指针”迭代器（不建议在 Safe Rust 中直接用），
     /// 可以使用 iter_mut().map(|x| x as *mut T) 或者参考下面的做法：
     pub fn iter_ptr(&mut self) -> impl Iterator<Item = *mut T> + '_ {

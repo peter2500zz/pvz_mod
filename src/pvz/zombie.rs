@@ -4,34 +4,21 @@ use tracing::trace;
 use windows::core::BOOL;
 
 use crate::{
-    add_callback, 
+    add_callback,
     hook::pvz::zombie::{
-        ADDR_UPDATE, 
-        ADDR_ZOMBIE_INITIALIZE, 
-        DataArrayAllocWrapper, 
-        UpdateWrapper, 
-        ZombieInitializeWrapper
-    }, 
-    mods::callback::{
-        POST, 
-        PRE, 
-        callback_data
-    }, 
-    pvz::{
-        data_array::DataArray, 
-        zombie::zombie::Zombie
-    }
+        ADDR_UPDATE, ADDR_ZOMBIE_INITIALIZE, DataArrayAllocWrapper, UpdateWrapper,
+        ZombieInitializeWrapper,
+    },
+    mods::callback::{POST, PRE, callback_data},
+    pvz::zombie::zombie::Zombie,
+    utils::data_array::DataArray,
 };
 
-
 /// `DataArray::DataArrayAlloc` 的 hook 函数
-pub extern "stdcall" fn DataArrayAlloc(
-    this: *mut DataArray<Zombie>,
-) -> *mut Zombie {
+pub extern "stdcall" fn DataArrayAlloc(this: *mut DataArray<Zombie>) -> *mut Zombie {
     // trace!("alloc zombie");
     DataArrayAllocWrapper(this)
 }
-
 
 pub extern "stdcall" fn ZombieInitialize(
     this: *mut Zombie,
@@ -41,7 +28,6 @@ pub extern "stdcall" fn ZombieInitialize(
     theParentZombie: *mut Zombie,
     theFromWave: i32,
 ) {
-
     // trace!("初始化 行 {} 类型 {} 来自第 {} 波", theRow, theZombieType, theFromWave);
     ZombieInitializeWrapper(
         this,
@@ -49,7 +35,7 @@ pub extern "stdcall" fn ZombieInitialize(
         theZombieType,
         theVariant,
         theParentZombie,
-        theFromWave
+        theFromWave,
     );
     unsafe {
         let zombie = &mut *this;
@@ -60,10 +46,7 @@ pub extern "stdcall" fn ZombieInitialize(
 }
 add_callback!("AT_ZOMBIE_INIT", POST | ADDR_ZOMBIE_INITIALIZE);
 
-
-pub extern "stdcall" fn Update(
-    this: *mut Zombie,
-) {
+pub extern "stdcall" fn Update(this: *mut Zombie) {
     unsafe {
         let zombie = &mut *this;
 

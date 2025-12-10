@@ -1,9 +1,10 @@
-use std::fmt::Debug;
+pub mod data_array;
+pub mod delta_mgr;
 
 use mlua::prelude::*;
+use std::fmt::Debug;
 
 use crate::mods::LuaRegistration;
-
 
 #[macro_export]
 macro_rules! pause {
@@ -110,7 +111,11 @@ impl<T: FromLua> FromLua for Vec2<T> {
         if let Some(vec2) = value.as_userdata() {
             Ok(Self::new(vec2.get("x")?, vec2.get("y")?))
         } else {
-            Err(LuaError::ToLuaConversionError { from: value.to_string()?, to: "Vec2", message: None })
+            Err(LuaError::ToLuaConversionError {
+                from: value.to_string()?,
+                to: "Vec2",
+                message: None,
+            })
         }
     }
 }
@@ -126,8 +131,9 @@ pub struct Rect2<T: Sized + FromLua> {
     pub size: Vec2<T>,
 }
 
-impl<T> Rect2<T> 
-where T: FromLua
+impl<T> Rect2<T>
+where
+    T: FromLua,
 {
     pub fn new(x: T, y: T, width: T, height: T) -> Self {
         Self {
@@ -140,9 +146,18 @@ where T: FromLua
 impl<T: FromLua> FromLua for Rect2<T> {
     fn from_lua(value: LuaValue, _: &Lua) -> LuaResult<Self> {
         if let Some(rect2) = value.as_userdata() {
-            Ok(Self::new(rect2.get("x")?, rect2.get("y")?, rect2.get("width")?, rect2.get("height")?))
+            Ok(Self::new(
+                rect2.get("x")?,
+                rect2.get("y")?,
+                rect2.get("width")?,
+                rect2.get("height")?,
+            ))
         } else {
-            Err(LuaError::ToLuaConversionError { from: value.to_string()?, to: "Rect2", message: None })
+            Err(LuaError::ToLuaConversionError {
+                from: value.to_string()?,
+                to: "Rect2",
+                message: None,
+            })
         }
     }
 }
@@ -156,7 +171,7 @@ where
 {
     fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
         // --- 复合属性访问 ---
-        
+
         // 获取 position (返回一个新的 Vec2 UserData)
         fields.add_field_method_get("position", |_, this| Ok(this.position));
 
@@ -164,7 +179,7 @@ where
         fields.add_field_method_get("size", |_, this| Ok(this.size));
 
         // --- 便捷属性 (快捷访问 x, y, width, height) ---
-        
+
         // x
         fields.add_field_method_get("x", |_, this| Ok(this.position.x));
 
@@ -181,9 +196,12 @@ where
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         // Rect2 的字符串表示
         methods.add_meta_method(LuaMetaMethod::ToString, |_, this, ()| {
-            Ok(format!("Rect2(Pos:({:?}, {:?}), Size:({:?}, {:?}))", this.position.x, this.position.y, this.size.x, this.size.y))
+            Ok(format!(
+                "Rect2(Pos:({:?}, {:?}), Size:({:?}, {:?}))",
+                this.position.x, this.position.y, this.size.x, this.size.y
+            ))
         });
-        
+
         // 示例：可以添加计算面积的方法
         // 注意：这需要 T 支持乘法，这里为了演示简化，暂不添加额外的 Math Trait Bounds
     }
