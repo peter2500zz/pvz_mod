@@ -4,7 +4,7 @@ use mlua::prelude::*;
 use tracing::*;
 
 use crate::{
-    mods::LuaRegistration, pvz::graphics::{Create, Destructor, DrawRect, SetColor}, utils::Vec2
+    mods::LuaRegistration, pvz::graphics::{Create, Destructor, DrawRect, FillRect, SetColor}, utils::Vec2
 };
 
 #[repr(C)]
@@ -146,6 +146,12 @@ impl LuaUserData for Graphics {
 
         methods.add_method("DrawRect", |_, this, rect| {
             DrawRect(this as *const _ as *mut _, rect);
+
+            Ok(())
+        });
+
+        methods.add_method("FillRect", |_, this, rect| {
+            FillRect(this as *const _ as *mut _, rect);
 
             Ok(())
         });

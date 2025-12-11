@@ -32,8 +32,24 @@
     ---@class Vec2 @二维向量
     ---@field x number
     ---@field y number
-    ---@field New fun(x: number, y: number): Vec2
-    ---@field Zero fun(): Vec2
+    ---@field Add fun(self, other: Vec2): Vec2 @向量加法
+    ---@field Sub fun(self, other: Vec2): Vec2 @向量减法
+    ---@field Mul fun(self, scalar: number): Vec2 @标量乘法
+    ---@field Div fun(self, scalar: number): Vec2 @标量除法
+    ---@field Dot fun(self, other: Vec2): number @点积（内积）
+    ---@field Length fun(self): number @向量长度（模）
+    ---@field LengthSquared fun(self): number @向量长度的平方
+    ---@field Normalize fun(self): Vec2 @归一化（返回单位向量）
+    ---@field Distance fun(self, other: Vec2): number @计算两点之间的距离
+    ---@field DistanceSquared fun(self, other: Vec2): number @计算两点之间距离的平方
+    ---@field Lerp fun(self, other: Vec2, t: number): Vec2 @线性插值
+    ---@field Angle fun(self): number @计算向量的角度（弧度）
+    ---@field AngleTo fun(self, other: Vec2): number @计算从当前点到另一点的角度
+    ---@field Rotate fun(self, angle: number): Vec2 @旋转向量（angle为弧度）
+    ---@field Cross fun(self, other: Vec2): number @叉积（2D叉积返回标量）
+    ---@field Reflect fun(self, normal: Vec2): Vec2 @反射向量（根据法线反射）
+    ---@field New fun(x: number, y: number): Vec2 @创建二位向量
+    ---@field Zero fun(): Vec2 @创建零向量
     Vec2 = {}
 
     ---@class Rect2 @二维矩形
@@ -43,6 +59,7 @@
     ---@field height number
     ---@field pos Vec2
     ---@field size Vec2
+    ---@field Contains fun(self, pos: Vec2): boolean @判断一个二维向量是否在自身范围内
     ---@field New fun(x: number, y: number, w: number, h: number): Rect2
     ---@field Zero fun(): Rect2
     Rect2 = {}
@@ -82,6 +99,7 @@
     ---@class Graphics @图形
     ---@field SetColor fun(self, color: Color) @设置绘图颜色
     ---@field DrawRect fun(self, rect: Rect2) @绘制一个空心矩形
+    ---@field FillRect fun(self, rect: Rect2) @绘制一个实心矩形
 
     ---@class Zombie @僵尸
     ---字段
@@ -89,8 +107,8 @@
     ---方法
     ---@field IsValid fun(self): boolean @这个僵尸是否在内存中有效
     ---@field GetPos fun(self): Vec2 @获取僵尸坐标
-    ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标，自动将所在行最接近的行
-    ---@field SetPosRaw fun(self, pos: Vec2) @设定僵尸坐标，不自动设定所在行
+    ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标
+    ---@field SetPosRaw fun(self, pos: Vec2) @设定僵尸坐标，不自动设定所在行，尽可能避免用这个因为会导致僵尸可能非预期的表现
     ---@field GetRow fun(self): integer @获取僵尸所在的行
     ---@field SetRow fun(self, row: integer) @设定僵尸所在的行
     ---@field GetHitbox fun(self): Rect2 @获取僵尸命中判定框

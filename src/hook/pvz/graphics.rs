@@ -24,6 +24,12 @@ pub static ORIGINAL_DESTRUCTOR: OnceLock<SignDestructor> = OnceLock::new();
 /// `Graphics::DrawRect` 的地址
 pub const ADDR_DRAW_RECT: u32 = 0x00586DE0;
 
+/// `Graphics::FillRect` 的地址
+pub const ADDR_FILL_RECT: u32 = 0x00586D50;
+
+/// `Graphics::SetColor` 的地址
+pub const ADDR_SET_COLOR: u32 = 0x00586CC0;
+
 inventory::submit! {
     HookRegistration(|| {
         let _ = ORIGINAL_CREATE.set(

@@ -1,6 +1,6 @@
 use std::arch::asm;
 
-use crate::{hook::pvz::graphics::{ADDR_DRAW_RECT, ORIGINAL_CREATE, ORIGINAL_DESTRUCTOR}, pvz::graphics::graphics::{Color, Graphics}, utils::Rect2};
+use crate::{hook::pvz::graphics::{ADDR_DRAW_RECT, ADDR_FILL_RECT, ADDR_SET_COLOR, ORIGINAL_CREATE, ORIGINAL_DESTRUCTOR}, pvz::graphics::graphics::{Color, Graphics}, utils::Rect2};
 
 pub mod graphics;
 
@@ -18,15 +18,14 @@ pub extern "thiscall" fn Destructor(
 
 pub fn SetColor(g: *mut Graphics, color: &Color) {
     unsafe {
-        let func_addr: usize = 0x00586CC0;
 
         asm!(
-            "call edx",
+            "call {func}",
             // 1. 输入绑定：直接告诉 Rust 把变量放在特定寄存器里
             // 这样 Rust 就不需要先分配随机寄存器再让你 mov 了
             in("eax") color, // color 是引用，传入的是地址，正是 EAX 需要的
             in("ecx") g,     // g 是指针，传入的是地址，正是 ECX 需要的
-            in("edx") func_addr,
+            func = in(reg) ADDR_SET_COLOR,
             
             // 2. 关键修复：告诉 Rust 我们破坏了什么
             // "clobber_abi" 告诉编译器："我进行了一个标准的函数调用"
@@ -75,6 +74,38 @@ pub fn DrawRect(
             func = in(reg) ADDR_DRAW_RECT,
 
             // 标记 ABI 破坏 (保护 eax, ecx, edx, flags)
+            clobber_abi("C"),
+        );
+    }
+}
+
+
+pub fn FillRect(
+    g: *mut Graphics,
+    rect: Rect2<i32>
+) {
+    unsafe {
+        asm!(
+            // 1. 压栈参数 (注意：汇编 push 顺序通常是反向的，从右到左)
+            "push {height}",
+            "push {width}",
+            "push {y}",
+            "push {x}",
+
+            // 2. 调用函数
+            "call {func}",
+
+            // 变量绑定
+            x = in(reg) rect.position.x,
+            y = in(reg) rect.position.y,
+            width = in(reg) rect.size.x,
+            height = in(reg) rect.size.y,
+
+            in("eax") g, 
+
+            func = in(reg) ADDR_FILL_RECT,
+
+            // 标记 ABI 破坏
             clobber_abi("C"),
         );
     }
