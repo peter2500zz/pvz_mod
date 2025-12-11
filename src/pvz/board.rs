@@ -1,13 +1,27 @@
 pub mod board;
 
-use std::{arch::naked_asm, ptr};
 use mlua::prelude::*;
+use std::arch::naked_asm;
 use tracing::*;
 
 use crate::{
-    add_callback, add_field_mut, hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_DRAW, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE
-    }, mods::callback::{POST, PRE, callback, callback_data}, pvz::{board::board::Board, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie}, utils::{Vec2, delta_mgr::get_delta_mgr}
+    add_callback, add_field_mut,
+    hook::pvz::board::{
+        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_DRAW, ADDR_KEYDOWN, ADDR_MOUSE_DOWN,
+        ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD,
+        ADDR_UPDATE, AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR,
+        ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN,
+        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+    },
+    mods::callback::{POST, PRE, callback, callback_data},
+    pvz::{
+        board::board::Board,
+        coin::Coin,
+        graphics::graphics::{Graphics, GraphicsHandle},
+        lawn_app::lawn_app::LawnApp,
+        zombie::zombie::Zombie,
+    },
+    utils::{Vec2, delta_mgr::get_delta_mgr},
 };
 
 /// 这是 `Board` 的构造函数
@@ -84,11 +98,11 @@ add_callback!("AT_NEW_COIN", PRE | ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: i32) {
-    trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
-    callback(PRE | ADDR_KEYDOWN, keycode);
-
-    // 回调
-    ORIGINAL_KEYDOWN.wait()(this, keycode);
+    // trace!("Board({:#x?}) 按下 {:#x}", this, keycode);
+    if !callback(PRE | ADDR_KEYDOWN, keycode) {
+        // 回调
+        ORIGINAL_KEYDOWN.wait()(this, keycode);
+    }
 }
 add_callback!("AT_BOARD_KEY_DOWN", PRE | ADDR_KEYDOWN);
 
@@ -122,19 +136,19 @@ add_callback!("AT_NEW_ZOMBIE", PRE | ADDR_ADD_ZOMBIE_IN_ROW);
 
 /// 关卡内鼠标点击
 pub extern "thiscall" fn MouseDown(this: *mut Board, pos: Vec2<i32>, theClickCount: i32) {
-    trace!("Board({:#x?}) 在 {:?} 点击 {}", this, pos, theClickCount);
-    callback(PRE | ADDR_MOUSE_DOWN, (theClickCount, pos));
-
-    ORIGINAL_MOUSE_DOWN.wait()(this, pos, theClickCount)
+    // trace!("Board({:#x?}) 在 {:?} 点击 {}", this, pos, theClickCount);
+    if !callback(PRE | ADDR_MOUSE_DOWN, (theClickCount, pos)) {
+        ORIGINAL_MOUSE_DOWN.wait()(this, pos, theClickCount)
+    }
 }
 add_callback!("AT_BOARD_MOUSE_DOWN", PRE | ADDR_MOUSE_DOWN);
 
 /// 关卡内鼠标松开
 pub extern "thiscall" fn MouseUp(this: *mut Board, pos: Vec2<i32>, theClickCount: i32) {
-    trace!("Board({:#x?}) 在 {:?} 松开 {}", this, pos, theClickCount);
-    callback(PRE | ADDR_MOUSE_UP, (theClickCount, pos));
-
-    ORIGINAL_MOUSE_UP.wait()(this, pos, theClickCount)
+    // trace!("Board({:#x?}) 在 {:?} 松开 {}", this, pos, theClickCount);
+    if !callback(PRE | ADDR_MOUSE_UP, (theClickCount, pos)) {
+        ORIGINAL_MOUSE_UP.wait()(this, pos, theClickCount)
+    }
 }
 add_callback!("AT_BOARD_MOUSE_UP", PRE | ADDR_MOUSE_UP);
 
@@ -149,11 +163,7 @@ pub extern "thiscall" fn Update(this: *mut Board) {
 add_callback!("AT_BOARD_UPDATE", POST | ADDR_UPDATE);
 
 #[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridXKeepOnBoard(
-    this: *mut Board,
-    theX: i32,
-    theY: i32
-) -> i32 {
+pub extern "stdcall" fn PixelToGridXKeepOnBoard(this: *mut Board, theX: i32, theY: i32) -> i32 {
     naked_asm!(
         "push ebp",
         "mov ebp, esp",
@@ -180,11 +190,7 @@ pub extern "stdcall" fn PixelToGridXKeepOnBoard(
 }
 
 #[unsafe(naked)]
-pub extern "stdcall" fn PixelToGridYKeepOnBoard(
-    this: *mut Board,
-    theX: i32,
-    theY: i32
-) -> i32 {
+pub extern "stdcall" fn PixelToGridYKeepOnBoard(this: *mut Board, theX: i32, theY: i32) -> i32 {
     naked_asm!(
         "push ebp",
         "mov ebp, esp",
@@ -210,29 +216,20 @@ pub extern "stdcall" fn PixelToGridYKeepOnBoard(
     )
 }
 
-pub fn PixelToGridKeepOnBoard(
-    this: *mut Board,
-    pos: Vec2<i32>,
-) -> Vec2<i32> {
+pub fn PixelToGridKeepOnBoard(this: *mut Board, pos: Vec2<i32>) -> Vec2<i32> {
     let grid_x = PixelToGridXKeepOnBoard(this, pos.x, pos.y);
     let grid_y = PixelToGridYKeepOnBoard(this, pos.x, pos.y);
     Vec2::new(grid_x, grid_y)
 }
 
 /// 两次绘制中会有多次更新
-pub extern "thiscall" fn Draw(
-    this: *mut Board,
-    g: *mut Graphics,
-) {
+pub extern "thiscall" fn Draw(this: *mut Board, g: *mut Graphics) {
     // info!("<d<");
     // pause!();
-    ORIGINAL_DRAW.wait()(
-        this,
-        g
-    );
-    unsafe {
-        callback(POST | ADDR_DRAW, ptr::read(g));
-    }
+    ORIGINAL_DRAW.wait()(this, g);
+
+    callback(POST | ADDR_DRAW, GraphicsHandle(g));
+
     // info!(">d>");
 }
 add_callback!("AT_BOARD_DRAW", POST | ADDR_DRAW);

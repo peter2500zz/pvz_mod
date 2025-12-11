@@ -1,5 +1,4 @@
 use mlua::prelude::*;
-use tracing::*;
 use std::ffi::c_void;
 use windows::core::BOOL;
 

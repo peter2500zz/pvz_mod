@@ -25,11 +25,13 @@ macro_rules! add_callback {
 }
 
 /// 通用回调函数 - 支持传递任意实现 IntoLuaMulti 的参数
-pub fn callback<'a, A>(at: u32, args: A)
+/// 
+/// 如果返回了 `true` 将不会执行原函数
+pub fn callback<A>(at: u32, args: A) -> bool
 where 
     A: IntoLuaMulti + Clone,
 {
-    let _ = with_lua(|lua| {
+    let result = with_lua(|lua| {
         let globals = lua.globals();
 
         // 获取或创建 Callbacks 表
@@ -63,13 +65,19 @@ where
         // 执行所有回调
         for func in funcs {
             // 每次调用都 clone args (因为 IntoLuaMulti 会消耗参数)
-            if let Err(e) = func.call::<()>(args.clone()) {
-                error!("Lua callback execution failed: {}", e);
+            match func.call::<bool>(args.clone()) {
+                Ok(result) => if result { return Ok(result); },
+                Err(e) => error!("Lua callback execution failed: {}", e),
             }
         }
 
-        Ok(())
+        Ok(false)
     });
+    if let Ok(result) = result {
+        result
+    } else {
+        false
+    }
 }
 
 // 修改点 1: 这里的 args 类型变为 &mut T，且不再有返回值

@@ -1,4 +1,5 @@
 pub mod data_array;
+#[allow(unused)]
 pub mod delta_mgr;
 
 use mlua::prelude::*;

@@ -20,7 +20,7 @@
     function RegisterMod(name) end
 
     ---获取游戏类
-    ---@return LawnApp? @返回游戏对象
+    ---@return LawnApp? @返回游戏对象，如果还未创建则为空
     function GetLawnApp() end
 
 ---模组类定义
@@ -77,8 +77,8 @@
     ---@class LawnApp @游戏
     ---方法
     ---@field GetWindowSize fun(self): Vec2 @获取窗口尺寸
-    ---@field GetBoard fun(self): Board? @获取关卡
-    ---@field GetWidgetManager fun(self): WidgetManager? @获取控件管理器
+    ---@field GetBoard fun(self): Board? @获取关卡，如果还未创建则为空
+    ---@field GetWidgetManager fun(self): WidgetManager? @获取控件管理器，如果还未创建则为空
 
     ---@class WidgetManager @控件管理器
     ---@field GetMousePos fun(self): Vec2 @获取鼠标坐标
@@ -153,16 +153,84 @@
 
 ---枚举
     ---@class ModCallbacks @回调点
-    ---游戏关卡分类
-    ---@field AT_BOARD_UPDATE integer @游戏关卡更新, fun(delta: number): nil
-    ---@field AT_BOARD_DRAW integer @游戏关卡绘制，两次绘制间可能有多次更新, fun(g: Graphics): nil
-    ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下, fun(keycode: integer): nil
-    ---@field AT_BOARD_MOUSE_DOWN integer @游戏关卡内鼠标点击, fun(mousecode: integer, pos: Vec2): nil
-    ---@field AT_BOARD_MOUSE_UP integer @游戏关卡内鼠标松开, fun(mousecode: integer, pos: Vec2): nil
-    ---@field AT_NEW_COIN integer @游戏关卡生成掉落物，fun(args: NewCoinArgs): nil
-    ---@field AT_NEW_ZOMBIE integer @游戏关卡生成僵尸，fun(args: NewZombieArgs): nil
-    ---@field AT_ZOMBIE_INIT integer @僵尸初始化，fun(zombie: Zombie): nil
-    ---@field AT_ZOMBIE_UPDATE integer @僵尸更新，fun(zombie: Zombie): nil
+    ---回调分类
+    ---@field AT_GAME_DRAW integer @游戏层面绘制
+        ---
+        ---回调函数签名
+        ---- `fun(g: Graphics)`
+        ---
+        ---参数
+        ---- `g` : 图形类
+    ---@field AT_GAME_KEY_DOWN integer @游戏层面按键按下
+        ---
+        ---回调函数签名
+        ---- `fun(keycode: integer): boolean?`
+        ---
+        ---参数
+        ---- `keycode` : 按下的键码
+        ---
+        ---返回值
+        ---- 如果是 `true` 则会消费此次事件
+    ---@field AT_GAME_KEY_UP integer @游戏层面按键松开
+        ---
+        ---回调函数签名
+        ---- `fun(keycode: integer): boolean?`
+        ---
+        ---参数
+        ---- `keycode` : 松开的键码
+        ---
+        ---返回值
+        ---- 如果是 `true` 则会消费此次事件
+    ---@field AT_BOARD_UPDATE integer @游戏关卡更新
+        ---
+        ---回调函数签名
+        ---- `fun(delta: number)`
+        ---
+        ---参数
+        ---- `delta` : 距离上一逻辑帧过去的时间（秒）
+    ---@field AT_BOARD_DRAW integer @游戏关卡绘制，两次绘制间可能有多次更新
+        ---
+        ---回调函数签名
+        ---- `fun(g: Graphics)`
+        ---
+        ---参数
+        ---- `g` : 图形类
+    ---@field AT_BOARD_KEY_DOWN integer @游戏关卡内按键按下
+        ---
+        ---回调函数签名
+        ---- `fun(keycode: integer): boolean?`
+        ---
+        ---参数
+        ---- `keycode` : 按下的键码
+        ---
+        ---返回值
+        ---- 如果是 `true` 则会消费此次事件
+    ---@field AT_BOARD_MOUSE_DOWN integer @游戏关卡内鼠标点击
+        ---
+        ---回调函数签名
+        ---- `fun(mousecode: integer, pos: Vec2): boolean?`
+        ---
+        ---参数
+        ---- `mousecode` : 按下的鼠标点击代码
+        ---- `pos` : 鼠标点击的坐标
+        ---
+        ---返回值
+        ---- 如果是 `true` 则会消费此次事件
+    ---@field AT_BOARD_MOUSE_UP integer @游戏关卡内鼠标松开
+        ---
+        ---回调函数签名
+        ---- `fun(mousecode: integer, pos: Vec2): boolean?`
+        ---
+        ---参数
+        ---- `mousecode` : 松开的鼠标点击代码
+        ---- `pos` : 鼠标点击的坐标
+        ---
+        ---返回值
+        ---- 如果是 `true` 则会消费此次事件
+    ---@field AT_NEW_COIN integer @游戏关卡生成掉落物，fun(args: NewCoinArgs)
+    ---@field AT_NEW_ZOMBIE integer @游戏关卡生成僵尸，fun(args: NewZombieArgs)
+    ---@field AT_ZOMBIE_INIT integer @僵尸初始化，fun(zombie: Zombie)
+    ---@field AT_ZOMBIE_UPDATE integer @僵尸更新，fun(zombie: Zombie)
     ModCallbacks = {}
 
     ---@class CoinTypes @掉落物类型
