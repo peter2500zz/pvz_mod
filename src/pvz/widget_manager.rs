@@ -10,10 +10,15 @@ use crate::{
     },
     mods::callback::{POST, PRE, callback},
     pvz::{
-        graphics::graphics::{Graphics, GraphicsHandle},
+        board::board::get_board,
+        graphics::{
+            TodDrawStringWrapped,
+            graphics::{Color, Graphics, GraphicsHandle},
+        },
         lawn_app::lawn_app::LawnApp,
         widget_manager::widget_manager::WidgetManager,
     },
+    utils::{Rect2, msvc_string::MsvcString},
 };
 
 /// 这是 `WidgetManager` 的构造函数
@@ -49,14 +54,34 @@ pub extern "stdcall" fn KeyUp(this: *mut WidgetManager, key: i32) {
     // trace!("松开键码 {:#x}", key);
     if !callback(PRE | ADDR_KEY_UP, key) {
         KeyUpWrapper(this, key);
+
+        if get_board().is_ok() {
+            callback(POST | ADDR_KEY_UP, key);
+        }
     }
 }
 add_callback!("AT_GAME_KEY_UP", PRE | ADDR_KEY_UP);
+add_callback!("AT_BOARD_KEY_UP", POST | ADDR_KEY_UP);
 
-pub extern "thiscall" fn PostDrawScreen(g: *mut Graphics) {
+pub extern "stdcall" fn PostDrawScreen(g: *mut Graphics) {
     // 不要使用 ptr::read(g)！
     // 直接创建一个 Handle，传递指针
     // GraphicsHandle 实现了 Copy/Clone，可以直接传给 callback
     callback(POST | ADDR_POST_DRAW_SCREEN, GraphicsHandle(g));
+    unsafe {
+        if *(0x006A7224 as *const u32) == 0 {
+            return;
+        }
+
+        TodDrawStringWrapped(
+            g,
+            &MsvcString::from("234"),
+            &Rect2::new(0, 0, 255, 255),
+            *( 0x006A7224 as *mut *mut _),
+            &Color::new(255, 0, 0, 255),
+            0,
+        );
+    }
+    
 }
 add_callback!("AT_GAME_DRAW", POST | ADDR_POST_DRAW_SCREEN);

@@ -236,6 +236,14 @@ impl LuaUserData for Zombie {
             with_zombie(this.id(), |zombie| Ok(zombie.pos = pos))
         });
 
+        methods.add_method("GetSpawnWave", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.spawn_wave))
+        });
+
+        methods.add_method("SetSpawnWave", |_, this, wave| {
+            with_zombie(this.id(), |zombie| Ok(zombie.spawn_wave = wave))
+        });
+
         methods.add_method("GetRow", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.row))
         });

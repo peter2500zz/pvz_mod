@@ -6,6 +6,7 @@ pub mod widget_container;
 pub mod zombie;
 pub mod coin;
 pub mod graphics;
+pub mod resource_manager;
 
 use inventory;
 use std::sync::OnceLock;

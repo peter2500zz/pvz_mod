@@ -6,6 +6,7 @@ pub mod lawn_app;
 pub mod widget_manager;
 pub mod widget_container;
 pub mod zombie;
+pub mod resource_manager;
 
 use tracing::{debug, info};
 use windows::{

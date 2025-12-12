@@ -128,9 +128,12 @@ static ORIGINAL_POST_DRAW_SCREEN: AtomicUsize = AtomicUsize::new(0);
 #[unsafe(naked)]
 pub extern "thiscall" fn PostDrawScreenHelper() {
     naked_asm!(
+        "pushad",
+        "pushfd",
         "push ecx",
         "call {hook}",
-        "pop ecx",
+        "popfd",
+        "popad",
         // 1. 读取存放的原始函数地址到 EDX
         // AtomicUsize 在内存中就是单纯的 usize 数据，可以直接读
         "mov edx, [{func}]",

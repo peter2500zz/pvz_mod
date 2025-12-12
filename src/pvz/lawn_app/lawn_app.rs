@@ -4,7 +4,7 @@ use mlua::prelude::*;
 
 use crate::{
     mods::LuaRegistration,
-    pvz::{board::board::Board, widget_manager::widget_manager::WidgetManager},
+    pvz::{board::board::Board, resource_manager::ResourceManager, widget_manager::widget_manager::WidgetManager},
     utils::Vec2,
 };
 
@@ -45,7 +45,10 @@ pub struct LawnApp {
     _pad_0xC8_0x320: [u8; 0x320 - 0xC8],
     /// 0x320 控件管理器
     pub widget_manager: *mut WidgetManager,
-    _pad_0x324_0x768: [u8; 0x768 - 0x324],
+    _pad_0x324_0x634: [u8; 0x634 - 0x324],
+    /// 0x638 资源管理器
+    pub resource_manager: *mut ResourceManager,
+    _pad_0x638_0x768: [u8; 0x768 - 0x638],
     /// 0x768 游戏关卡
     pub board: *mut Board,
     _pad_0x76C_0x8C8: [u8; 0x8C8 - 0x76C],
