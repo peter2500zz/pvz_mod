@@ -6,7 +6,7 @@ pub mod msvc_string;
 pub mod render_manager;
 
 use mlua::prelude::*;
-use std::fmt::Debug;
+use std::{env, fmt::Debug, path::PathBuf};
 
 use crate::mods::LuaRegistration;
 
@@ -51,6 +51,13 @@ macro_rules! add_field {
             $fields.add_field_method_get($name, |_, this| Ok(this.$field));
         )*
     };
+}
+
+pub fn get_exe_dir() -> PathBuf {
+    env::current_exe()
+        .ok()
+        .and_then(|path| path.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| PathBuf::from("."))
 }
 
 inventory::submit! {
@@ -385,6 +392,18 @@ where
                 && pos_f64.x <= this_f64.position.x + this_f64.size.x
                 && pos_f64.y >= this_f64.position.y
                 && pos_f64.y <= this_f64.position.y + this_f64.size.y)
+        });
+
+        methods.add_method("Collides", |_, this, other: Rect2<T>| {
+            let this_f64 = this.as_f64();
+            let other_f64 = other.as_f64();
+
+            Ok(
+                this_f64.position.x < other_f64.position.x + other_f64.size.x
+                    && this_f64.position.x + this_f64.size.x > other_f64.position.x
+                    && this_f64.position.y < other_f64.position.y + other_f64.size.y
+                    && this_f64.position.y + this_f64.size.y > other_f64.position.y,
+            )
         });
 
         methods.add_function("New", |_, (x, y, w, h)| {

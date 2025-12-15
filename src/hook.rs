@@ -73,9 +73,5 @@ pub fn init_hook() -> Result<()> {
         MinHook::enable_all_hooks()?;
     }
 
-    // unsafe {
-    //     ORIGINAL_BOARD_ADDCOIN = Some(hook(ADDR_BOARD_ADDCOIN, board_add_coin as _)?);
-    // }
-
     Ok(())
 }

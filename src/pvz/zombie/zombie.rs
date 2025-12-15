@@ -216,6 +216,10 @@ impl LuaUserData for Zombie {
         // 如果僵尸被从内存里清理掉了，就给 false
         methods.add_method("IsValid", |_, this, ()| Ok(get_zombie(this.id()).is_ok()));
 
+        methods.add_method("GetId", |_, this, ()| {
+            Ok(this.id())
+        });
+
         methods.add_method("GetPos", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.pos))
         });
@@ -289,6 +293,15 @@ impl LuaUserData for Zombie {
             with_zombie(this.id(), |zombie| Ok(zombie.body_hp_max = hp_max))
         });
 
+        methods.add_method("HasHelmet", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_type != 0))
+        });
+        methods.add_method("GetHelmetType", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_type))
+        });
+        methods.add_method("SetHelmetType", |_, this, helmet_type| {
+            with_zombie(this.id(), |zombie| Ok(zombie.helmet_type = helmet_type))
+        });
         methods.add_method("GetHelmetHp", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp))
         });
@@ -302,6 +315,15 @@ impl LuaUserData for Zombie {
             with_zombie(this.id(), |zombie| Ok(zombie.helmet_hp_max = hp_max))
         });
 
+        methods.add_method("HasShield", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_type != 0))
+        });
+        methods.add_method("GetShieldType", |_, this, ()| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_type))
+        });
+        methods.add_method("SetShieldType", |_, this, shield_type| {
+            with_zombie(this.id(), |zombie| Ok(zombie.shield_type = shield_type))
+        });
         methods.add_method("GetShieldHp", |_, this, ()| {
             with_zombie(this.id(), |zombie| Ok(zombie.shield_hp))
         });
@@ -313,13 +335,6 @@ impl LuaUserData for Zombie {
         });
         methods.add_method("SetShieldHpMax", |_, this, hp_max| {
             with_zombie(this.id(), |zombie| Ok(zombie.shield_hp_max = hp_max))
-        });
-    }
-
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        // 由于 UserData 给 Lua 后会锁定状态，虽然对大多数字段不合适，但 this.id 不变，太棒了
-        fields.add_field_method_get("body_hp", |_, this| {
-            with_zombie(this.id(), |zombie| Ok(zombie.body_hp))
         });
     }
 }

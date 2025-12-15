@@ -5,6 +5,7 @@ mod mods;
 #[allow(non_snake_case)]
 mod pvz;
 mod utils;
+mod config;
 
 use anyhow::Result;
 use std::ffi::c_void;
@@ -21,6 +22,8 @@ use windows::{
 use windows_wrapper::mb;
 
 use crate::{debug::alloc_console, hook::init_hook, logger::setup_logger};
+
+const CONFIG: &str = "conf.yml";
 
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]

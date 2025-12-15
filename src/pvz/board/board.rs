@@ -158,12 +158,4 @@ impl LuaUserData for Board {
             })
         });
     }
-
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        fields.add_field_method_get("sun", |_, _| with_board(|board| Ok(board.sun_value)));
-
-        fields.add_field_method_set("sun", |_, _, value| {
-            with_board(|board| Ok(board.sun_value = value))
-        });
-    }
 }
