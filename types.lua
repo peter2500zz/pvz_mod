@@ -20,7 +20,7 @@
     function RegisterMod(name) end
 
     ---获取游戏类
-    ---@return LawnApp? @返回游戏对象，如果还未创建则为空
+    ---@return LawnApp @返回游戏对象
     function GetLawnApp() end
 
 ---模组类定义
@@ -75,10 +75,12 @@
 
 ---游戏类定义
     ---@class LawnApp @游戏
+    ---字段
+    ---@field debug fun(flag: string) @调试保留
     ---方法
     ---@field GetWindowSize fun(self): Vec2 @获取窗口尺寸
     ---@field GetBoard fun(self): Board? @获取关卡，如果还未创建则为空
-    ---@field GetWidgetManager fun(self): WidgetManager? @获取控件管理器，如果还未创建则为空
+    ---@field GetWidgetManager fun(self): WidgetManager @获取控件管理器
 
     ---@class WidgetManager @控件管理器
     ---@field GetMousePos fun(self): Vec2 @获取鼠标坐标

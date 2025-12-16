@@ -11,7 +11,7 @@ use crate::{
     },
     mods::callback::{POST, PRE, callback_data},
     pvz::{graphics::graphics::Graphics, zombie::zombie::Zombie},
-    utils::data_array::DataArray,
+    utils::data_array::{DataArray, HasId},
 };
 
 /// `DataArray::DataArrayAlloc` 的 hook 函数
@@ -41,7 +41,7 @@ pub extern "stdcall" fn ZombieInitialize(
         let zombie = &mut *this;
 
         callback_data(POST | ADDR_ZOMBIE_INITIALIZE, zombie);
-        trace!("初始化僵尸 {:#x?} {:#x?}", this, (*this).body_anim_id);
+        trace!("初始化僵尸 {:#x?} {:#x?}", this, (*this).id());
     }
 }
 add_callback!("AT_ZOMBIE_INIT", POST | ADDR_ZOMBIE_INITIALIZE);

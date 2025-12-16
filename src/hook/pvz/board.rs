@@ -1,14 +1,21 @@
 use std::{
     arch::{asm, naked_asm},
-    sync::OnceLock,
+    sync::{
+        OnceLock,
+        atomic::{AtomicUsize, Ordering},
+    },
 };
 
 use super::{HookRegistration, hook};
 use crate::{
     pvz::{
-        board::{self, board::Board}, coin::Coin, graphics::graphics::Graphics, lawn_app::lawn_app::LawnApp, zombie::zombie::Zombie
+        board::{self, board::Board},
+        coin::Coin,
+        graphics::graphics::Graphics,
+        lawn_app::lawn_app::LawnApp,
+        zombie::zombie::Zombie,
     },
-    utils::Vec2,
+    utils::{Vec2, msvc_string::MsvcString},
 };
 
 /// `Board` 构造函数的地址
@@ -152,12 +159,87 @@ pub const ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD: u32 = 0x0041C650;
 /// `Board::Draw` 的地址
 pub const ADDR_DRAW: u32 = 0x0041ACF0;
 /// `Board::Draw` 的签名
-type SignDraw = extern "thiscall" fn(
-    this: *mut Board,
-    g: *mut Graphics,
-);
+type SignDraw = extern "thiscall" fn(this: *mut Board, g: *mut Graphics);
 /// `Board::Draw` 的跳板
 pub static ORIGINAL_DRAW: OnceLock<SignDraw> = OnceLock::new();
+
+/// `LawnLoadGame` 的地址
+const ADDR_LAWN_LOAD_GAME: u32 = 0x00481FE0 as _;
+/// `LawnLoadGame` 的跳板
+pub static ORIGINAL_LAWN_LOAD_GAME: AtomicUsize = AtomicUsize::new(0);
+
+#[unsafe(naked)]
+extern "stdcall" fn LawnLoadGameHelper() {
+    naked_asm!(
+        "push ebp",
+        "mov ebp, esp",
+
+        "push [ebp + 8]",
+        "push ecx",
+        "call {func}",
+
+        "leave",
+        "ret",
+
+        func = sym board::LawnLoadGame
+    )
+}
+
+pub fn LawnLoadGameWrapper(this: *mut Board, theFilePath: *const MsvcString) -> bool {
+    unsafe {
+        let result: u32;
+        asm!(
+            "push {path}",
+            "call [{func}]",
+            "add esp, 4",
+            path = in(reg) theFilePath,
+            func = sym ORIGINAL_LAWN_LOAD_GAME,
+            in("ecx") this,
+            lateout("eax") result,
+            clobber_abi("C"),
+        );
+        result != 0
+    }
+}
+
+/// `LawnSaveGame` 的地址
+const ADDR_LAWN_SAVE_GAME: u32 = 0x004820D0 as _;
+/// `LawnSaveGame` 的跳板
+pub static ORIGINAL_LAWN_SAVE_GAME: AtomicUsize = AtomicUsize::new(0);
+
+#[unsafe(naked)]
+extern "stdcall" fn LawnSaveGameHelper() {
+    naked_asm!(
+        "push ebp",
+        "mov ebp, esp",
+
+        "push [ebp + 8]",
+        "push edi",
+        "call {func}",
+
+        "leave",
+        "ret",
+
+        func = sym board::LawnSaveGame
+    )
+}
+
+pub fn LawnSaveGameWrapper(this: *mut Board, theFilePath: *const MsvcString) -> bool {
+    unsafe {
+        let result: u32;
+        asm!(
+            "push {path}",
+            "call [{func}]",
+            "add esp, 4",
+            path = in(reg) theFilePath,
+            func = sym ORIGINAL_LAWN_SAVE_GAME,
+            in("edi") this,
+            lateout("eax") result,
+            clobber_abi("C"),
+        );
+        result != 0
+    }
+}
 
 inventory::submit! {
     HookRegistration(|| {
@@ -199,6 +281,14 @@ inventory::submit! {
 
         let _ = ORIGINAL_DRAW.set(
             hook(ADDR_DRAW as _, board::Draw as _)?
+        );
+
+        let _ = ORIGINAL_LAWN_LOAD_GAME.store(
+            hook(ADDR_LAWN_LOAD_GAME as _, LawnLoadGameHelper as _)?, Ordering::SeqCst
+        );
+
+        let _ = ORIGINAL_LAWN_SAVE_GAME.store(
+            hook(ADDR_LAWN_SAVE_GAME as _, LawnSaveGameHelper as _)?, Ordering::SeqCst
         );
 
         Ok(())

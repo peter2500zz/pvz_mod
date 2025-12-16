@@ -9,9 +9,9 @@ use crate::{
     hook::pvz::board::{
         ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP,
         ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE,
-        AddZombieInRowWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR,
-        ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN,
-        ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        AddZombieInRowWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
+        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
+        ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
     },
     mods::callback::{POST, PRE, callback, callback_data},
     pvz::{
@@ -21,6 +21,7 @@ use crate::{
     utils::{
         Vec2,
         delta_mgr::get_delta_mgr,
+        msvc_string::MsvcString,
         render_manager::{RenderLayer, execute_layer_render},
     },
 };
@@ -232,4 +233,22 @@ pub extern "thiscall" fn Draw(this: *mut Board, g: *mut Graphics) {
     execute_layer_render(RenderLayer::Board, g);
 
     // info!(">d>");
+}
+
+/// 游戏读取存档
+pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
+    unsafe {
+        debug!("从 {} 读取存档", (*theFilePath).to_string());
+    }
+
+    LawnLoadGameWrapper(this, theFilePath)
+}
+
+/// 游戏读取存档
+pub extern "stdcall" fn LawnSaveGame(this: *mut Board, theFilePath: *const MsvcString) -> bool {
+    unsafe {
+        debug!("保存存档至 {}", (*theFilePath).to_string());
+    }
+
+    LawnSaveGameWrapper(this, theFilePath)
 }

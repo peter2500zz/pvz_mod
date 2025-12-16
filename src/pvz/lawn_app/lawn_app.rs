@@ -1,11 +1,12 @@
 use std::ptr;
 
 use mlua::prelude::*;
+use tracing::debug;
 
 use crate::{
     mods::LuaRegistration,
     pvz::{
-        board::board::Board, resource_manager::ResourceManager,
+        board::board::Board, player_info::PlayerInfo, resource_manager::ResourceManager,
         widget_manager::widget_manager::WidgetManager,
     },
     utils::Vec2,
@@ -47,7 +48,10 @@ pub struct LawnApp {
     _pad_0x638_0x768: [u8; 0x768 - 0x638],
     /// 0x768 游戏关卡
     pub board: *mut Board,
-    _pad_0x76C_0x8C8: [u8; 0x8C8 - 0x76C],
+    _pad_0x76C_0x82C: [u8; 0x82C - 0x76C],
+    /// 0x82C 用户档案与存档
+    pub player_info: *mut PlayerInfo,
+    _pad_0x830_0x8C8: [u8; 0x8C8 - 0x830],
 }
 const _: () = assert!(size_of::<LawnApp>() == 0x8C8);
 
@@ -67,6 +71,22 @@ pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> LuaResult<T>) -> LuaResu
 
 impl LuaUserData for LawnApp {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        methods.add_function("debug", |_, flag: String| {
+            with_lawn_app(|lawn_app| {
+                unsafe {
+                    match flag.as_str() {
+                        "save slot" => {
+                            debug!("{}", (*lawn_app.player_info).save_slot);
+                        }
+
+                        _ => debug!("无效调试标志"),
+                    }
+                }
+
+                Ok(LuaNil)
+            })
+        });
+
         // 获取窗口尺寸
         methods.add_method("GetWindowSize", |_, _, ()| {
             with_lawn_app(|lawn_app| Ok(lawn_app.window_size))

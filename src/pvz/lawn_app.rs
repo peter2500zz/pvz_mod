@@ -6,10 +6,10 @@ use tracing::{debug, error, info, trace};
 
 use crate::{
     hook::pvz::lawn_app::{
-        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS,
+        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS
     },
     mods::load_mods,
-    pvz::{lawn_app::lawn_app::LawnApp},
+    pvz::lawn_app::lawn_app::LawnApp, utils::msvc_string::MsvcString,
 };
 
 /// 这是 `LawnApp` 的构造函数
@@ -74,3 +74,4 @@ pub extern "thiscall" fn LostFocus(this: *mut LawnApp) {
     //     this
     // );
 }
+
