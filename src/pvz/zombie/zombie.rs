@@ -6,8 +6,7 @@ use crate::{
     pvz::board::{
         PixelToGridYKeepOnBoard,
         board::{get_board, with_board},
-    },
-    utils::{Rect2, Vec2, data_array::HasId},
+    }, save::PROFILE_MANAGER, utils::{Rect2, Vec2, data_array::HasId}
 };
 
 #[repr(C)]
@@ -213,6 +212,17 @@ pub fn with_zombie<T>(id: i32, f: impl FnOnce(&mut Zombie) -> LuaResult<T>) -> L
 
 impl LuaUserData for Zombie {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
+        // 外部数据
+        methods.add_method("SetAttr", |_, this, (key, value)| {
+            PROFILE_MANAGER.lock().unwrap().set_zombie_attr(this.id(), key, value)
+        });
+        methods.add_method("GetAttr", |lua, this, key| {
+            Ok(PROFILE_MANAGER.lock().unwrap().get_zombie_attr(lua, this.id(), key))
+        });
+        methods.add_method("RemoveAttr", |_, this, key| {
+            Ok(PROFILE_MANAGER.lock().unwrap().remove_zombie_attr(this.id(), key))
+        });
+
         // 如果僵尸被从内存里清理掉了，就给 false
         methods.add_method("IsValid", |_, this, ()| Ok(get_zombie(this.id()).is_ok()));
 

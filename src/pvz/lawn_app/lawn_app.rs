@@ -71,12 +71,20 @@ pub fn with_lawn_app<T>(f: impl FnOnce(&mut LawnApp) -> LuaResult<T>) -> LuaResu
 
 impl LuaUserData for LawnApp {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_function("debug", |_, flag: String| {
+        methods.add_function("tigger", |_, flag: String| {
             with_lawn_app(|lawn_app| {
                 unsafe {
                     match flag.as_str() {
                         "save slot" => {
                             debug!("{}", (*lawn_app.player_info).save_slot);
+                        }
+                        "win" => {
+                            debug!("pre: {}", (*(*lawn_app).board).is_winning);
+                            (*(*lawn_app).board).is_winning = true;
+                            debug!("tiggerred win: {}", (*(*lawn_app).board).is_winning);
+                            debug!("pre: {}", (*(*lawn_app).board).is_win);
+                            (*(*lawn_app).board).is_win = true;
+                            debug!("tiggerred win: {}", (*(*lawn_app).board).is_win);
                         }
 
                         _ => debug!("无效调试标志"),

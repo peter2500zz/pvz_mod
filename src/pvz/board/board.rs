@@ -41,7 +41,13 @@ pub struct Board {
     _pad_0xAC_0x5560: [u8; 0x5560 - 0xAC],
     /// 0x5560 阳光值
     pub sun_value: i32,
-    _pad_0x5564_0x57B0: [u8; 0x57B0 - 0x5564],
+    _pad_0x5564_0x5600: [u8; 0x5600 - 0x5564],
+    /// 0x5600 true时为过关过程
+    pub is_winning: bool,
+    _pad_0x5601_0x560C: [u8; 0x560C - 0x5601],
+    /// 0x560C true时为过关状态
+    pub is_win: bool,
+    _pad_0x560D_0x57B0: [u8; 0x57B0 - 0x560D],
 }
 const _: () = assert!(size_of::<Board>() == 0x57B0);
 

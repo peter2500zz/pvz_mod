@@ -20,6 +20,7 @@ use crate::{
     },
     utils::{
         Vec2,
+        data_array::HasId,
         delta_mgr::get_delta_mgr,
         msvc_string::MsvcString,
         render_manager::{RenderLayer, execute_layer_render},
@@ -241,7 +242,17 @@ pub extern "stdcall" fn LawnLoadGame(this: *mut Board, theFilePath: *const MsvcS
         debug!("从 {} 读取存档", (*theFilePath).to_string());
     }
 
-    LawnLoadGameWrapper(this, theFilePath)
+    let mut success = LawnLoadGameWrapper(this, theFilePath);
+
+    if success {
+        unsafe {
+            for zombie in (*this).zombies.iter() {
+                debug!("读取僵尸 {:#x}", zombie.id())
+            }
+        }
+    }
+
+    success
 }
 
 /// 游戏读取存档

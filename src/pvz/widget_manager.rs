@@ -12,15 +12,12 @@ use crate::{
     pvz::{
         board::board::get_board,
         graphics::{
-            TodDrawStringWrapped,
-            graphics::{Color, Graphics, Render},
+            graphics::{Graphics, Render},
         },
         lawn_app::lawn_app::LawnApp,
         widget_manager::widget_manager::WidgetManager,
     },
     utils::{
-        Rect2,
-        msvc_string::MsvcString,
         render_manager::{RenderLayer, execute_layer_render, finish_render_frame},
     },
 };

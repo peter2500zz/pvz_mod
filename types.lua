@@ -3,6 +3,7 @@
 ---别名
     ---@alias CallbackFunction fun(...): ...
 
+    ---@alias Serializable Serializable[]|boolean|number|integer|string|table<Serializable, Serializable>
 
 ---函数
     ---将日志写入到终端中
@@ -20,7 +21,7 @@
     function RegisterMod(name) end
 
     ---获取游戏类
-    ---@return LawnApp @返回游戏对象
+    ---@return LawnApp @返回游戏对象，如果还未创建则为空
     function GetLawnApp() end
 
 ---模组类定义
@@ -76,11 +77,11 @@
 ---游戏类定义
     ---@class LawnApp @游戏
     ---字段
-    ---@field debug fun(flag: string) @调试保留
+    ---@field tigger fun(flag: string) @调试保留
     ---方法
     ---@field GetWindowSize fun(self): Vec2 @获取窗口尺寸
     ---@field GetBoard fun(self): Board? @获取关卡，如果还未创建则为空
-    ---@field GetWidgetManager fun(self): WidgetManager @获取控件管理器
+    ---@field GetWidgetManager fun(self): WidgetManager @获取控件管理器，如果还未创建则为空
 
     ---@class WidgetManager @控件管理器
     ---@field GetMousePos fun(self): Vec2 @获取鼠标坐标
@@ -107,6 +108,9 @@
     ---字段
     ---@field body_hp integer @僵尸身体的血量
     ---方法
+    ---@field SetAttr fun(self, key: string, value: Serializable) @设定自定义僵尸数据
+    ---@field GetAttr fun(self, key: string): Serializable? @获取自定义僵尸数据
+    ---@field RemoveAttr fun(self, key: string) @删除自定义僵尸数据
     ---@field IsValid fun(self): boolean @这个僵尸是否在内存中有效
     ---@field GetPos fun(self): Vec2 @获取僵尸坐标
     ---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标

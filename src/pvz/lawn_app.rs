@@ -9,7 +9,7 @@ use crate::{
         ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS
     },
     mods::load_mods,
-    pvz::lawn_app::lawn_app::LawnApp, utils::msvc_string::MsvcString,
+    pvz::lawn_app::lawn_app::LawnApp,
 };
 
 /// 这是 `LawnApp` 的构造函数

@@ -6,6 +6,7 @@ mod mods;
 mod pvz;
 mod utils;
 mod config;
+mod save;
 
 use anyhow::Result;
 use std::ffi::c_void;
