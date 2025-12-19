@@ -22,7 +22,7 @@ use crate::{
         lawn_app::lawn_app::{LawnApp, get_lawn_app},
         zombie::zombie::Zombie,
     },
-    save::{PROFILE_MANAGER, SAVES_DIR},
+    save::{PROFILE_MANAGER, Profile, SAVES_DIR},
     utils::{
         Vec2,
         delta_mgr::get_delta_mgr,
@@ -37,6 +37,10 @@ pub extern "thiscall" fn Constructor(uninit: *mut Board, theApp: *mut LawnApp) -
 
     let this = ORIGINAL_CONSTRUCTOR.wait()(uninit, theApp);
 
+    if let Ok(mut pm) = PROFILE_MANAGER.lock() {
+        pm.clear();
+    }
+
     trace!("地址 {:#x?}", this);
 
     this
@@ -47,6 +51,10 @@ pub extern "thiscall" fn Destructor(this: *mut Board) {
     trace!("析构 Board");
 
     ORIGINAL_DESTRUCTOR.wait()(this);
+
+    if let Ok(mut pm) = PROFILE_MANAGER.lock() {
+        pm.clear();
+    }
 }
 
 /// `Board` 的初始化函数

@@ -2,6 +2,8 @@ use std::marker::PhantomData;
 use std::os::raw::c_char;
 
 pub trait HasId {
+    const NAMESPACE: &'static str;
+
     /// 获取对象的当前 ID
     fn id(&self) -> i32;
 }

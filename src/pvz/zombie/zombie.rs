@@ -185,6 +185,8 @@ pub struct Zombie {
 const _: () = assert!(size_of::<Zombie>() == 0x15C);
 
 impl HasId for Zombie {
+    const NAMESPACE: &'static str = "Zombie";
+
     fn id(&self) -> i32 {
         self.id
     }
@@ -214,13 +216,13 @@ impl LuaUserData for Zombie {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         // 外部数据
         methods.add_method("SetAttr", |_, this, (key, value)| {
-            PROFILE_MANAGER.lock().unwrap().set_zombie_attr(this.id(), key, value)
+            PROFILE_MANAGER.lock().unwrap().set_attr(this, key, value)
         });
         methods.add_method("GetAttr", |lua, this, key| {
-            Ok(PROFILE_MANAGER.lock().unwrap().get_zombie_attr(lua, this.id(), key))
+            Ok(PROFILE_MANAGER.lock().unwrap().get_attr(lua, this, key))
         });
         methods.add_method("RemoveAttr", |_, this, key| {
-            Ok(PROFILE_MANAGER.lock().unwrap().remove_zombie_attr(this.id(), key))
+            Ok(PROFILE_MANAGER.lock().unwrap().remove_attr(this, key))
         });
 
         // 如果僵尸被从内存里清理掉了，就给 false
