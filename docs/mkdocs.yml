@@ -1,0 +1,41 @@
+site_name: Rumia API 使用文档
+site_author: peter2500zz
+
+repo_name: peter2500zz/rumia
+repo_url: https://github.com/peter2500zz/rumia
+
+theme:
+  name: material
+
+  language: zh
+
+  features:
+    - content.code.copy # 代码支持拷贝
+    - content.tabs.link # 内容tabs支持  https://squidfunk.github.io/mkdocs-material/reference/content-tabs/
+    - navigation.tabs # 顶部导航
+    - navigation.tabs.sticky # 顶部导航粘连
+    - navigation.indexes # 导航index页面支持
+    - navigation.sections # 全部展开(非折叠状态)
+    - navigation.expand # 子目录展开
+    - navigation.top # 返回顶部按钮
+    - toc.follow # 页面目录支持
+
+  icon:
+    logo: logo
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+
+nav:
+  - 简介: index.md
+  - 快速开始: 
+    - 创建你的第一个 Mod:
+      - quick-start/index.md
+      - quick-start/mod-entry.md

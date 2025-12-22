@@ -5,11 +5,9 @@ pub mod save;
 use tracing::{debug, error, info, trace};
 
 use crate::{
-    hook::pvz::lawn_app::{
-        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS
-    },
-    mods::load_mods,
-    pvz::lawn_app::lawn_app::LawnApp,
+    add_callback, hook::pvz::lawn_app::{
+        ADDR_INIT, ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_INIT, ORIGINAL_LOST_FOCUS
+    }, mods::{callback::{POST, callback}, load_mods}, pvz::lawn_app::lawn_app::LawnApp
 };
 
 /// 这是 `LawnApp` 的构造函数
@@ -53,6 +51,7 @@ pub extern "thiscall" fn Init(this: *mut LawnApp) {
             error!("加载 Mod 时出现错误: {}", e)
         }
     }
+    callback(POST | ADDR_INIT, ());
 
     // unsafe {
     //     (*(*this).resource_manager).use_system_font = true;
@@ -60,6 +59,7 @@ pub extern "thiscall" fn Init(this: *mut LawnApp) {
     //     info!("{:?}", f);
     // }
 }
+add_callback!("AT_GAME_INIT", POST | ADDR_INIT);
 
 /// 程序窗口失去焦点
 ///
