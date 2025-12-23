@@ -45,7 +45,7 @@ Log.info("Hello world!")
 
 ### 添加回调
 
-Rumia 基本是事件驱动型，因此为了绘制碰撞箱，我们需要添加一个回调函数，同时标记在 `AT_DRAW` 事件发生时调用回调函数。
+Rumia 基本是事件驱动型，因此为了绘制碰撞箱，我们需要添加一个回调函数，同时标记在 [AT_DRAW](../api/callback/AT_DRAW.md) 事件发生时调用回调函数。
 
 我们顺便定义一些之后在本 Mod 内使用的变量。
 
@@ -76,7 +76,7 @@ mod:AddCallback(ModCallbacks.AT_DRAW, atDraw)
 
 ### 绘制碰撞箱
 
-为了与游戏对象交互，Rumia 提供了 `GetLawnApp()` 函数用于获取代表游戏本身的类。我们这次需要使用它的成员方法 `LawnApp:GetBoard()`
+为了与游戏对象交互，Rumia 提供了 [GetLawnApp()](../api/global/GetLawnApp.md ) 函数用于获取代表游戏本身的类。我们这次需要使用它的成员方法 `LawnApp:GetBoard()`
 
 ```lua
 ---@param g Graphics

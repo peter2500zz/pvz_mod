@@ -235,11 +235,3 @@ pub fn get_widget_manager() -> LuaResult<*mut WidgetManager> {
 pub fn with_widget_manager<T>(f: impl FnOnce(&mut WidgetManager) -> LuaResult<T>) -> LuaResult<T> {
     get_widget_manager().and_then(|widget_manager| unsafe { f(&mut *widget_manager) })
 }
-
-impl LuaUserData for WidgetManager {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetMousePos", |_, _, ()| {
-            with_widget_manager(|wm| Ok(wm.mouse_pos))
-        });
-    }
-}

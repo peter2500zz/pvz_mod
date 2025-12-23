@@ -4,7 +4,7 @@ use mlua::prelude::*;
 use crate::{
     debug::tigger_handler, mods::LuaRegistration, pvz::{
         board::board::Board, player_info::PlayerInfo, resource_manager::ResourceManager,
-        widget_manager::widget_manager::WidgetManager,
+        widget_manager::widget_manager::{WidgetManager, with_widget_manager},
     }, utils::Vec2
 };
 
@@ -91,17 +91,9 @@ impl LuaUserData for LawnApp {
             }
         });
 
-        // 获取控件管理器
-        methods.add_method("GetWidgetManager", |lua, this, ()| {
-            if this.widget_manager as u32 == 0 {
-                Ok(LuaNil)
-            } else {
-                unsafe {
-                    let widget_manager = lua.create_userdata(ptr::read(this.widget_manager))?;
-
-                    Ok(mlua::Value::UserData(widget_manager))
-                }
-            }
+        // 获取鼠标坐标
+        methods.add_method("GetMousePos", |_, _, ()| {
+            with_widget_manager(|wm| Ok(wm.mouse_pos))
         });
     }
 }
