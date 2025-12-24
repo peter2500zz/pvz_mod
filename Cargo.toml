@@ -6,6 +6,9 @@ edition = "2024"
 [lib]
 crate-type = ["cdylib"]
 
+[profile.release]
+opt-level = 3
+
 [dependencies]
 anyhow = "1.0.100"
 fern = { version = "0.7.1", features = ["colored"] }
@@ -15,8 +18,19 @@ mlua = { version = "0.11.5", features = ["lua54", "vendored", "serialize", "macr
 regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
-serde_yaml = "0.9.34"
 tracing = "0.1.43"
-widestring = "1.2.1"
-windows = { version = "0.62.2", features = ["Win32_Foundation", "Win32_System_Console", "Win32_System_SystemServices", "Win32_UI_WindowsAndMessaging"] }
+windows = { version = "0.62.2", features = ["Win32_System_Console"] }
+windows_wrapper = { git = "https://github.com/peter2500zz/windows_wrapper" }
+config = { path = "config" }
+
+[workspace]
+members = [
+    "config",
+    "loader",
+]
+
+[workspace.dependencies]
+anyhow = "1.0.100"
+config = { path = "config" }
+serde = { version = "1.0.228", features = ["derive"] }
 windows_wrapper = { git = "https://github.com/peter2500zz/windows_wrapper" }

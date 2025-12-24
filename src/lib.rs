@@ -5,7 +5,6 @@ mod mods;
 #[allow(non_snake_case)]
 mod pvz;
 mod utils;
-mod config;
 mod save;
 
 use anyhow::Result;

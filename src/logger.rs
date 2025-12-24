@@ -1,3 +1,4 @@
+use config::load_config;
 use fern::{
     Dispatch,
     colors::{Color, ColoredLevelConfig},
@@ -5,7 +6,7 @@ use fern::{
 use tracing::{log::LevelFilter};
 use serde::Deserialize;
 
-use crate::{CONFIG, config::load_config};
+use crate::{CONFIG};
 
 const DEFAULT_LOG_PATH: &str = "pvz.log";
 const DEFAULT_LOG_LEVEL: LogLevel = LogLevel::Info;

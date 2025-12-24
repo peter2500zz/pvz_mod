@@ -1,0 +1,9 @@
+[package]
+name = "config"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde_yaml = "0.9.34"
+serde = { workspace = true }
+windows_wrapper = { workspace = true }

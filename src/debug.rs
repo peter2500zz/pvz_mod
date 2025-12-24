@@ -1,9 +1,10 @@
 use anyhow::Result;
+use config::load_config;
 use serde::Deserialize;
 use tracing::debug;
 use windows::Win32::System::Console::AllocConsole;
 
-use crate::{CONFIG, config::load_config, pvz::lawn_app::lawn_app::with_lawn_app, save::PROFILE_MANAGER};
+use crate::{CONFIG, pvz::lawn_app::lawn_app::with_lawn_app, save::PROFILE_MANAGER};
 
 #[derive(Deserialize)]
 struct Config {

@@ -51,6 +51,8 @@ nav:
       - RegisterMod: api/global/RegisterMod.md
       - Log: api/global/Log.md
       - Vec2: api/global/Vec2.md
+      - Rect2: api/global/Rect2.md
+      - Color: api/global/Color.md
       - GetLawnApp: api/global/GetLawnApp.md
     - 回调点:
       - 回调点: api/callback/index.md
