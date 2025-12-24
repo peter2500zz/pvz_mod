@@ -8,6 +8,8 @@ mod utils;
 mod save;
 
 use anyhow::Result;
+use config::{load_config, save_config};
+use ::serde::{Deserialize, Serialize};
 use std::ffi::c_void;
 use tracing::{debug, info};
 use windows::{
@@ -24,6 +26,12 @@ use windows_wrapper::mb;
 use crate::{debug::alloc_console, hook::init_hook, logger::setup_logger};
 
 const CONFIG: &str = "conf.yml";
+
+#[derive(Serialize, Deserialize, Debug)]
+struct LoaderConfig {
+    force_launch: Option<bool>,
+}
+
 
 #[unsafe(no_mangle)]
 #[allow(non_snake_case)]
@@ -43,7 +51,17 @@ pub extern "system" fn DllMain(
                 true
             }
             Err(e) => {
-                mb!("初始化时遇到问题\n{}", e);
+                let mut cfg: LoaderConfig = load_config(CONFIG);
+                let extra_msg = if cfg.force_launch.unwrap_or(false) {
+                    cfg.force_launch = Some(false);
+                    save_config(CONFIG, &cfg);
+
+                    "\n\n由于发生错误，已禁用强制启动。你可以在下次启动时选择其他可执行文件。"
+                } else{
+                    ""
+                };
+
+                mb!("初始化时遇到问题\n{}{}", e, extra_msg);
 
                 false
             }

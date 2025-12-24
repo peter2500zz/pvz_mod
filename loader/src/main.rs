@@ -1,7 +1,8 @@
 #![windows_subsystem = "windows"]
 
-use std::{ffi::c_void, path::PathBuf, ptr::null_mut};
+mod detours;
 
+use std::{ffi::c_void, path::{Path, PathBuf}, ptr::null_mut};
 use anyhow::{Result, anyhow};
 use rfd::FileDialog;
 use serde::{Deserialize, Serialize};
@@ -17,8 +18,10 @@ use windows::{
     },
     core::{PCWSTR, w},
 };
-use windows_wrapper::formatw;
+use windows_wrapper::{formatw, mb};
 use config::{load_config, save_config};
+
+use crate::detours::launch_pvz;
 
 const CONFIG: &str = "conf.yml";
 const TARGET_VERSION: &str = "1.0.0.1051";
@@ -27,14 +30,16 @@ const TARGET_PRODUCT_NAME: &str = "Plants vs. Zombies";
 
 #[derive(Serialize, Deserialize, Debug)]
 struct LoaderConfig {
+    #[serde(skip_serializing_if = "Option::is_none")]
     path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     force_launch: Option<bool>,
 }
 
 fn main() {
     let mut config: LoaderConfig = load_config(CONFIG);
 
-    let mut path = if let Some(path) = config.path {
+    let mut path = if let Some(path) = config.path.clone() && Path::new(&path).exists() {
         path
     } else {
         let path = get_game_exe().to_string_lossy().to_string();
@@ -46,10 +51,19 @@ fn main() {
     };
 
     loop {
+        if config.force_launch.unwrap_or(false) {
+            break;
+        }
+
         match check_version(&path) {
-            Ok(_) => todo!(),
+            Ok(_) => break,
             Err(e) => match continue_or_not(&e.to_string()) {
-                IDYES => break,
+                IDYES => {
+                    config.force_launch = Some(true);
+                    save_config(CONFIG, &config);
+
+                    break
+                },
                 IDNO => {
                     path = get_game_exe().to_string_lossy().to_string();
 
@@ -59,6 +73,15 @@ fn main() {
                 IDCANCEL | _ => return,
             },
         }
+    }
+
+    let result = launch_pvz(path);
+
+    if result.is_none() {
+        config.force_launch = Some(false);
+        save_config(CONFIG, &config);
+
+        mb!("启动失败，已禁用强制启动。你可以在下次启动时选择其他可执行文件。");
     }
 }
 
@@ -97,13 +120,13 @@ fn check_version(path: &str) -> Result<String> {
     unsafe {
         // 得绑定一下变量不然就吊死了
         let pathu16 = formatw!("{}", path);
-        let lp_pathu16 = PCWSTR(pathu16.as_ptr() as _);
+        let lp_pathu16 = PCWSTR(pathu16.as_ptr());
 
         let mut handle = 0;
 
         let size = GetFileVersionInfoSizeW(lp_pathu16, Some(&mut handle));
         if size == 0 {
-            return Err(anyhow!("无法获取版本信息"));
+            return Err(anyhow!("无法获取 {} 的版本信息", path));
         }
 
         let mut buffer: Vec<u8> = vec![0u8; size as usize];
@@ -144,7 +167,7 @@ fn check_version(path: &str) -> Result<String> {
 
             let success = VerQueryValueW(
                 buffer.as_ptr() as *const c_void,
-                PCWSTR(query.as_ptr() as _),
+                PCWSTR(query.as_ptr()),
                 &mut product_ptr as *mut *mut c_void,
                 &mut product_len,
             );
@@ -174,7 +197,7 @@ fn check_version(path: &str) -> Result<String> {
         );
 
         if !success.as_bool() {
-            return Err(anyhow!("无法解析版本值"));
+            return Err(anyhow!("无法解析 {} 的版本值", path));
         }
 
         let info = &*(ptr as *const VS_FIXEDFILEINFO);
