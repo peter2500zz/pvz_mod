@@ -1,0 +1,13 @@
+---@meta
+
+---@class Rect2 @二维矩形
+---@field x number
+---@field y number
+---@field width number
+---@field height number
+---@field pos Vec2
+---@field size Vec2
+---@field New fun(x: number, y: number, w: number, h: number): Rect2
+---@field Zero fun(): Rect2
+---@field Contains fun(self, pos: Vec2): boolean @判断一个二维向量是否在自身范围内
+---@field Collides fun(self, other: Rect2): boolean @判断自身是否与给定矩形碰撞（相交）

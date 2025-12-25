@@ -1,0 +1,11 @@
+---@meta
+
+---@class CoinMotions @掉落物运动方式
+---@field DROP_FROM_XY CoinMotion @从坐标落下
+---@field SLOW_DROP_FROM_XY CoinMotion @从坐标缓慢落下
+---@field POP_FROM_BACK CoinMotion @从后方跳出
+---@field FAST_POP_FROM_BACK CoinMotion @从后方快速跳出
+---@field COLLECT_IMMEDIATELY CoinMotion @直接收集
+---@field AUTO_COLLECT_LATER CoinMotion @稍后自动收集
+---@field POP_FROM_RIGHT CoinMotion @从屏幕右侧蹦出
+---@field SPAWN_IN_SEED_SLOT CoinMotion @在卡槽栏生成

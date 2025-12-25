@@ -1,0 +1,32 @@
+---@meta
+
+---@class Zombie @僵尸
+---方法
+---@field SetAttr fun(self, key: string, value: Serializable) @设定自定义僵尸数据
+---@field GetAttr fun(self, key: string): Serializable? @获取自定义僵尸数据
+---@field RemoveAttr fun(self, key: string) @删除自定义僵尸数据
+---@field IsValid fun(self): boolean @这个僵尸是否在内存中有效
+---@field GetPos fun(self): Vec2 @获取僵尸坐标
+---@field SetPos fun(self, pos: Vec2) @设定僵尸坐标
+---@field SetPosRaw fun(self, pos: Vec2) @设定僵尸坐标，不自动设定所在行，尽可能避免用这个因为会导致僵尸可能非预期的表现
+---@field GetRow fun(self): integer @获取僵尸所在的行
+---@field SetRow fun(self, row: integer) @设定僵尸所在的行
+---@field GetHitbox fun(self): Rect2 @获取僵尸命中判定框
+---@field GetHitboxRelative fun(self): Rect2 @获取僵尸命中判定框，原点为僵尸坐标
+---@field GetAtkbox fun(self): Rect2 @获取僵尸攻击判定框
+---@field GetAtkboxRelative fun(self): Rect2 @获取僵尸攻击判定框，原点为僵尸坐标
+---
+---@field GetBodyHp fun(self): integer @获取僵尸本体血量
+---@field SetBodyHp fun(self, hp: integer) @设定僵尸本体血量
+---@field GetBodyHpMax fun(self): integer @获取僵尸本体血量上限
+---@field SetBodyHpMax fun(self, hp_max: integer) @设定僵尸本体血量上限
+---
+---@field GetHelmetHp fun(self): integer @获取僵尸头部护具血量
+---@field SetHelmetHp fun(self, hp: integer) @设定僵尸头部护具血量
+---@field GetHelmetHpMax fun(self): integer @获取僵尸头部护具血量上限
+---@field SetHelmetHpMax fun(self, hp_max: integer) @设定僵尸头部护具血量上限
+---
+---@field GetShieldHp fun(self): integer @获取僵尸身前护具血量
+---@field SetShieldHp fun(self, hp: integer) @设定僵尸身前护具血量
+---@field GetShieldHpMax fun(self): integer @获取僵尸身前护具血量上限
+---@field SetShieldHpMax fun(self, hp_max: integer) @设定僵尸身前护具血量上限

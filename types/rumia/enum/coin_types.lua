@@ -1,0 +1,30 @@
+---@meta
+
+---@class CoinTypes @掉落物类型
+---@field SILVER_COIN CoinType @银币
+---@field GOLD_COIN CoinType @金币
+---@field DIAMOND CoinType @钻石
+---@field SUN CoinType @太阳
+---@field SMALL_SUN CoinType @小太阳
+---@field LARGE_SUN CoinType @大太阳
+---@field SEED_PACKET CoinType @植物卡片
+---@field TROPHY CoinType @奖杯
+---@field SHOVEL CoinType @铲子
+---@field ALMANAC CoinType @图鉴
+---@field KEY CoinType @钥匙
+---@field VASE CoinType @花瓶
+---@field WATERING_CAN CoinType @洒水壶
+---@field SANDWICH CoinType @三明治
+---@field NOTE CoinType @便条
+---@field VANISH_PLACEHOLDER CoinType @立即消失(占位)
+---@field SEEDLING_GIFT CoinType @花苗礼盒
+---@field COIN_BAG CoinType @金币袋
+---@field GIFT_BOX_PERSISTENT CoinType @礼盒(不消失)
+---@field COIN_BAG_PERSISTENT CoinType @金币袋(不消失)
+---@field SILVER_TROPHY CoinType @银奖杯
+---@field GOLD_TROPHY CoinType @金奖杯
+---@field CHOCOLATE CoinType @巧克力
+---@field CHOCOLATE_PERSISTENT CoinType @巧克力(不消失)
+---@field GIFT_BOX_MINI_GAMES CoinType @礼品盒(小游戏)
+---@field GIFT_BOX_PUZZLE CoinType @礼品盒(解密模式)
+---@field GIFT_BOX_SURVIVAL CoinType @礼品盒(生存模式)

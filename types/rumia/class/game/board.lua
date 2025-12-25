@@ -1,0 +1,12 @@
+---@meta
+
+---@class Board @关卡
+---方法
+---@field GetUpdateDelta fun(self): number @获取距离上一逻辑帧的时间
+---@field MousePressing fun(self): boolean @鼠标是否按住（暂停不记录）
+---@field SetSun fun(self, value: integer) @设置关卡的阳光值
+---@field GetZombies fun(self): table<integer, Zombie> @返回场上所有僵尸
+---@field GetZombieById fun(self, id: integer): Zombie? @通过僵尸 id 查询僵尸
+---@field AddZombie fun(self, zombie_type: integer, row: integer, from_wave: integer): Zombie @生成一只新的僵尸
+---@field AddCoin fun(self, pos: Vec2, coin_type: CoinType, coin_motion: CoinMotion): Coin @生成一只新的僵尸
+---@field PosToGridKeepOnBoard fun(self, pos: Vec2): Vec2 @将坐标转换为地图中的棋盘坐标，确保是可用的

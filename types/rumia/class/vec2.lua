@@ -1,0 +1,23 @@
+---@meta
+
+---@class Vec2 @二维向量
+---@field x number
+---@field y number
+---@field Add fun(self, other: Vec2): Vec2 @向量加法
+---@field Sub fun(self, other: Vec2): Vec2 @向量减法
+---@field Mul fun(self, scalar: number): Vec2 @标量乘法
+---@field Div fun(self, scalar: number): Vec2 @标量除法
+---@field Dot fun(self, other: Vec2): number @点积（内积）
+---@field Length fun(self): number @向量长度（模）
+---@field LengthSquared fun(self): number @向量长度的平方
+---@field Normalize fun(self): Vec2 @归一化（返回单位向量）
+---@field Distance fun(self, other: Vec2): number @计算两点之间的距离
+---@field DistanceSquared fun(self, other: Vec2): number @计算两点之间距离的平方
+---@field Lerp fun(self, other: Vec2, t: number): Vec2 @线性插值
+---@field Angle fun(self): number @计算向量的角度（弧度）
+---@field AngleTo fun(self, other: Vec2): number @计算从当前点到另一点的角度
+---@field Rotate fun(self, angle: number): Vec2 @旋转向量（angle为弧度）
+---@field Cross fun(self, other: Vec2): number @叉积（2D叉积返回标量）
+---@field Reflect fun(self, normal: Vec2): Vec2 @反射向量（根据法线反射）
+---@field New fun(x: number, y: number): Vec2 @创建二位向量
+---@field Zero fun(): Vec2 @创建零向量

@@ -1,0 +1,91 @@
+---@meta
+
+---@class ModCallbacks @回调点
+---回调分类
+---@field AT_DRAW ModCallback @渲染与绘制
+    ---
+    ---回调函数签名
+    ---- `fun(g: Graphics)`
+    ---
+    ---参数
+    ---- `g` : 图形类
+---@field AT_GAME_KEY_DOWN ModCallback @游戏层面按键按下
+    ---
+    ---回调函数签名
+    ---- `fun(keycode: KeyCode): boolean?`
+    ---
+    ---参数
+    ---- `keycode` : 按下的键码
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_GAME_KEY_UP ModCallback @游戏层面按键松开
+    ---
+    ---回调函数签名
+    ---- `fun(keycode: KeyCode): boolean?`
+    ---
+    ---参数
+    ---- `keycode` : 松开的键码
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_BOARD_UPDATE ModCallback @游戏关卡更新
+    ---
+    ---回调函数签名
+    ---- `fun(delta: number)`
+    ---
+    ---参数
+    ---- `delta` : 距离上一逻辑帧过去的时间（秒）
+---@field AT_BOARD_KEY_DOWN ModCallback @游戏关卡内按键按下
+    ---
+    ---回调函数签名
+    ---- `fun(keycode: KeyCode): boolean?`
+    ---
+    ---参数
+    ---- `keycode` : 按下的键码
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_BOARD_KEY_UP ModCallback @游戏关卡内按键松开
+    ---
+    ---回调函数签名
+    ---- `fun(keycode: KeyCode): boolean?`
+    ---
+    ---参数
+    ---- `keycode` : 松开的键码
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_BOARD_MOUSE_DOWN ModCallback @游戏关卡内鼠标点击
+    ---
+    ---回调函数签名
+    ---- `fun(mousecode: MouseCode, pos: Vec2): boolean?`
+    ---
+    ---参数
+    ---- `mousecode` : 按下的鼠标点击代码
+    ---- `pos` : 鼠标点击的坐标
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_BOARD_MOUSE_UP ModCallback @游戏关卡内鼠标松开
+    ---
+    ---回调函数签名
+    ---- `fun(mousecode: MouseCode, pos: Vec2): boolean?`
+    ---
+    ---参数
+    ---- `mousecode` : 松开的鼠标点击代码
+    ---- `pos` : 鼠标点击的坐标
+    ---
+    ---返回值
+    ---- 如果是 `true` 则会消费此次事件
+---@field AT_NEW_COIN ModCallback @游戏关卡生成掉落物，fun(args: NewCoinArgs)
+---@field AT_NEW_ZOMBIE ModCallback @游戏关卡生成僵尸，fun(args: NewZombieArgs)
+---@field AT_ZOMBIE_INIT ModCallback @僵尸初始化，fun(zombie: Zombie)
+---@field AT_ZOMBIE_DIE ModCallback @僵尸死亡，函数内此僵尸仍然被视为有效，自定数据将在所有此类回调函数结束后被清理
+    ---
+    ---回调函数签名
+    ---- `fun(zombie: Zombie)`
+    ---
+    ---参数
+    ---- `zombie` : 死亡的僵尸
+---@field AT_ZOMBIE_UPDATE ModCallback @僵尸更新，fun(zombie: Zombie)

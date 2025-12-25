@@ -1,0 +1,198 @@
+---@meta
+
+---@class KeyCodes @键码
+---@field MODIFIERS KeyCode @用于从键值中提取修饰键的位掩码
+---@field NONE KeyCode @没有按键按下
+---@field L_BUTTON KeyCode @鼠标左键
+---@field R_BUTTON KeyCode @鼠标右键
+---@field LR_BUTTON KeyCode @左右键一起按
+---@field M_BUTTON KeyCode @鼠标中键（三键鼠标）
+---@field X_BUTTON_1 KeyCode @第一个 X 鼠标键（五键鼠标）
+---@field X_BUTTON_2 KeyCode @第二个 X 鼠标键（五键鼠标）
+---@field LMR_BUTTON KeyCode @左中右键一起按
+---@field BACK KeyCode @BACKSPACE 键
+---@field TAB KeyCode @TAB 键
+---@field LINE_FEED KeyCode @LINEFEED 键
+---@field CLEAR KeyCode @CLEAR 键
+---@field ENTER KeyCode @ENTER 键
+---@field RETURN KeyCode @RETURN 键
+---@field SHIFT_KEY KeyCode @SHIFT 键
+---@field CONTROL_KEY KeyCode @CTRL 键
+---@field MENU KeyCode @ALT 键
+---@field PAUSE KeyCode @PAUSE 键
+---@field CAPITAL KeyCode @CAPS LOCK 键
+---@field CAPS_LOCK KeyCode @CAPS LOCK 键
+---@field HANGUEL_MODE KeyCode @IME Hanguel 模式键（为兼容性而保留；请使用 HangulMode）
+---@field HANGUL_MODE KeyCode @IME Hangul 模式键
+---@field KANA_MODE KeyCode @IME Kana 模式键
+---@field JUNJA_MODE KeyCode @IME Junja 模式键
+---@field FINAL_MODE KeyCode @IME Final 模式键
+---@field HANJA_MODE KeyCode @IME Hanja 模式键
+---@field KANJI_MODE KeyCode @IME Kanji 模式键
+---@field ESCAPE KeyCode @ESC 键
+---@field IME_CONVERT KeyCode @IME 转换键
+---@field IME_NONCONVERT KeyCode @IME 非转换键
+---@field IME_ACCEPT KeyCode @IME 接受键，取代了 IMEAceept
+---@field IME_ACEEPT KeyCode @IME 接受键已过时，请改用 IMEAccept
+---@field IME_MODE_CHANGE KeyCode @IME 模式更改键
+---@field SPACE KeyCode @SPACEBAR（空格）键
+---@field PAGE_UP KeyCode @PAGE UP（上翻页）键
+---@field PRIOR KeyCode @PAGE UP（上翻页）键
+---@field NEXT KeyCode @PAGE DOWN（下翻页）键
+---@field PAGE_DOWN KeyCode @PAGE DOWN（下翻页）键
+---@field END KeyCode @END 键
+---@field HOME KeyCode @HOME 键
+---@field LEFT KeyCode @LEFT ARROW（左箭头）键
+---@field UP KeyCode @UP ARROW（上箭头）键
+---@field RIGHT KeyCode @RIGHT ARROW（右箭头）键
+---@field DOWN KeyCode @DOWN ARROW（下箭头）键
+---@field SELECT KeyCode @SELECT 键
+---@field PRINT KeyCode @PRINT 键
+---@field EXECUTE KeyCode @EXECUTE 键
+---@field PRINT_SCREEN KeyCode @PRINT SCREEN（打印屏幕）键
+---@field SNAPSHOT KeyCode @PRINT SCREEN（打印屏幕）键
+---@field INSERT KeyCode @INS（插入）键
+---@field DELETE KeyCode @DEL（删除）键
+---@field HELP KeyCode @HELP（帮助）键
+---@field D0 KeyCode @0 键
+---@field D1 KeyCode @1 键
+---@field D2 KeyCode @2 键
+---@field D3 KeyCode @3 键
+---@field D4 KeyCode @4 键
+---@field D5 KeyCode @5 键
+---@field D6 KeyCode @6 键
+---@field D7 KeyCode @7 键
+---@field D8 KeyCode @8 键
+---@field D9 KeyCode @9 键
+---@field A KeyCode @A 键
+---@field B KeyCode @B 键
+---@field C KeyCode @C 键
+---@field D KeyCode @D 键
+---@field E KeyCode @E 键
+---@field F KeyCode @F 键
+---@field G KeyCode @G 键
+---@field H KeyCode @H 键
+---@field I KeyCode @I 键
+---@field J KeyCode @J 键
+---@field K KeyCode @K 键
+---@field L KeyCode @L 键
+---@field M KeyCode @M 键
+---@field N KeyCode @N 键
+---@field O KeyCode @O 键
+---@field P KeyCode @P 键
+---@field Q KeyCode @Q 键
+---@field R KeyCode @R 键
+---@field S KeyCode @S 键
+---@field T KeyCode @T 键
+---@field U KeyCode @U 键
+---@field V KeyCode @V 键
+---@field W KeyCode @W 键
+---@field X KeyCode @X 键
+---@field Y KeyCode @Y 键
+---@field Z KeyCode @Z 键
+---@field L_WIN KeyCode @左 Windows 徽标键（Microsoft 自然键盘）
+---@field R_WIN KeyCode @右 Windows 徽标键（Microsoft 自然键盘）
+---@field APPS KeyCode @应用程序键（Microsoft 自然键盘）
+---@field SLEEP KeyCode @计算机睡眠键
+---@field NUM_PAD_0 KeyCode @数字键盘上的 0 键
+---@field NUM_PAD_1 KeyCode @数字键盘上的 1 键
+---@field NUM_PAD_2 KeyCode @数字键盘上的 2 键
+---@field NUM_PAD_3 KeyCode @数字键盘上的 3 键
+---@field NUM_PAD_4 KeyCode @数字键盘上的 4 键
+---@field NUM_PAD_5 KeyCode @数字键盘上的 5 键
+---@field NUM_PAD_6 KeyCode @数字键盘上的 6 键
+---@field NUM_PAD_7 KeyCode @数字键盘上的 7 键
+---@field NUM_PAD_8 KeyCode @数字键盘上的 8 键
+---@field NUM_PAD_9 KeyCode @数字键盘上的 9 键
+---@field MULTIPLY KeyCode @乘法键
+---@field ADD KeyCode @加法键
+---@field SEPARATOR KeyCode @分隔符键
+---@field SUBTRACT KeyCode @减法键
+---@field DECIMAL KeyCode @小数点键
+---@field DIVIDE KeyCode @除法键
+---@field F1 KeyCode @F1 键
+---@field F2 KeyCode @F2 键
+---@field F3 KeyCode @F3 键
+---@field F4 KeyCode @F4 键
+---@field F5 KeyCode @F5 键
+---@field F6 KeyCode @F6 键
+---@field F7 KeyCode @F7 键
+---@field F8 KeyCode @F8 键
+---@field F9 KeyCode @F9 键
+---@field F10 KeyCode @F10 键
+---@field F11 KeyCode @F11 键
+---@field F12 KeyCode @F12 键
+---@field F13 KeyCode @F13 键
+---@field F14 KeyCode @F14 键
+---@field F15 KeyCode @F15 键
+---@field F16 KeyCode @F16 键
+---@field F17 KeyCode @F17 键
+---@field F18 KeyCode @F18 键
+---@field F19 KeyCode @F19 键
+---@field F20 KeyCode @F20 键
+---@field F21 KeyCode @F21 键
+---@field F22 KeyCode @F22 键
+---@field F23 KeyCode @F23 键
+---@field F24 KeyCode @F24 键
+---@field NUM_LOCK KeyCode @NUM LOCK 键
+---@field SCROLL KeyCode @SCROLL LOCK 键
+---@field L_SHIFT_KEY KeyCode @左 SHIFT 键
+---@field R_SHIFT_KEY KeyCode @右 SHIFT 键
+---@field L_CONTROL_KEY KeyCode @左 CTRL 键
+---@field R_CONTROL_KEY KeyCode @右 CTRL 键
+---@field L_MENU KeyCode @左 ALT 键
+---@field R_MENU KeyCode @右 ALT 键
+---@field BROWSER_BACK KeyCode @浏览器后退键
+---@field BROWSER_FORWARD KeyCode @浏览器前进键
+---@field BROWSER_REFRESH KeyCode @浏览器刷新键
+---@field BROWSER_STOP KeyCode @浏览器停止键
+---@field BROWSER_SEARCH KeyCode @浏览器搜索键
+---@field BROWSER_FAVORITES KeyCode @浏览器收藏夹键
+---@field BROWSER_HOME KeyCode @浏览器主页键
+---@field VOLUME_MUTE KeyCode @静音键
+---@field VOLUME_DOWN KeyCode @降低音量键
+---@field VOLUME_UP KeyCode @增大音量键
+---@field MEDIA_NEXT_TRACK KeyCode @媒体下一曲键
+---@field MEDIA_PREVIOUS_TRACK KeyCode @媒体上一曲键
+---@field MEDIA_STOP KeyCode @媒体停止键
+---@field MEDIA_PLAY_PAUSE KeyCode @媒体播放/暂停键
+---@field LAUNCH_MAIL KeyCode @启动邮件键
+---@field SELECT_MEDIA KeyCode @选择媒体键
+---@field LAUNCH_APPLICATION_1 KeyCode @启动应用程序一键
+---@field LAUNCH_APPLICATION_2 KeyCode @启动应用程序二键
+---@field OEM_1 KeyCode @OEM 1 键
+---@field OEM_SEMICOLON KeyCode @US 标准键盘上的 OEM 分号键
+---@field OEM_PLUS KeyCode @任何国家/地区键盘上的 OEM 加号键
+---@field OEM_COMMA KeyCode @任何国家/地区键盘上的 OEM 逗号键
+---@field OEM_MINUS KeyCode @任何国家/地区键盘上的 OEM 减号键
+---@field OEM_PERIOD KeyCode @任何国家/地区键盘上的 OEM 句点键
+---@field OEM_2 KeyCode @OEM 2 键
+---@field OEM_QUESTION KeyCode @US 标准键盘上的 OEM 问号键
+---@field OEM_3 KeyCode @OEM 3 键
+---@field OEM_TILDE KeyCode @US 标准键盘上的 OEM 波浪号键
+---@field OEM_4 KeyCode @OEM 4 键
+---@field OEM_OPEN_BRACKETS KeyCode @US 标准键盘上的 OEM 左中括号键
+---@field OEM_5 KeyCode @OEM 5 键
+---@field OEM_PIPE KeyCode @US 标准键盘上的 OEM 竖线键
+---@field OEM_6 KeyCode @OEM 6 键
+---@field OEM_CLOSE_BRACKETS KeyCode @US 标准键盘上的 OEM 右中括号键
+---@field OEM_7 KeyCode @OEM 7 键
+---@field OEM_QUOTES KeyCode @US 标准键盘上的 OEM 单引号/双引号键
+---@field OEM_8 KeyCode @OEM 8 键
+---@field OEM_102 KeyCode @OEM 102 键
+---@field OEM_BACKSLASH KeyCode @RT 102 键键盘上的 OEM 尖括号或反斜杠键
+---@field PROCESS_KEY KeyCode @PROCESS KEY 键
+---@field PACKET KeyCode @用于传递 Unicode 字符，如同它们是按键一样
+---@field ATTN KeyCode @ATTN 键
+---@field CRSEL KeyCode @CRSEL 键
+---@field EXSEL KeyCode @EXSEL 键
+---@field ERASE_EOF KeyCode @ERASE EOF 键
+---@field PLAY KeyCode @PLAY 键
+---@field ZOOM KeyCode @ZOOM 键
+---@field NO_NAME KeyCode @保留供将来使用的常量
+---@field PA1 KeyCode @PA1 键
+---@field OEM_CLEAR KeyCode @CLEAR 键
+---@field CODE KeyCode @用于从键值中提取键码的位掩码
+---@field SHIFT KeyCode @SHIFT 修饰键
+---@field CONTROL KeyCode @CTRL 修饰键
+---@field ALT KeyCode @ALT 修饰键
