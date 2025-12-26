@@ -78,14 +78,12 @@
     ---
     ---返回值
     ---- 如果是 `true` 则会消费此次事件
----@field AT_NEW_COIN ModCallback @游戏关卡生成掉落物，fun(args: NewCoinArgs)
----@field AT_NEW_ZOMBIE ModCallback @游戏关卡生成僵尸，fun(args: NewZombieArgs)
 ---@field AT_ZOMBIE_INIT ModCallback @僵尸初始化，fun(zombie: Zombie)
----@field AT_ZOMBIE_DIE ModCallback @僵尸死亡，函数内此僵尸仍然被视为有效，自定数据将在所有此类回调函数结束后被清理
+---@field AT_ZOMBIE_DIE ModCallback @僵尸死亡，函数内此僵尸仍然被视为有效，自定数据将在所有此回调函数结束后被清理
     ---
     ---回调函数签名
     ---- `fun(zombie: Zombie)`
     ---
     ---参数
-    ---- `zombie` : 死亡的僵尸
+    ---- `zombie` : 将要死亡的僵尸
 ---@field AT_ZOMBIE_UPDATE ModCallback @僵尸更新，fun(zombie: Zombie)

@@ -1,20 +1,19 @@
 pub mod board;
 
 use anyhow::{Result, anyhow};
-use mlua::prelude::*;
 use std::{arch::naked_asm, fs::File};
 use tracing::*;
 
 use crate::{
-    add_callback, add_field_mut,
+    add_callback,
     hook::pvz::board::{
-        ADDR_ADD_ZOMBIE_IN_ROW, ADDR_ADDCOIN, ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP,
-        ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD, ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE,
-        AddZombieInRowWrapper, LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN,
-        ORIGINAL_CONSTRUCTOR, ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL,
-        ORIGINAL_KEYDOWN, ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
+        ADDR_KEYDOWN, ADDR_MOUSE_DOWN, ADDR_MOUSE_UP, ADDR_PIXEL_TO_GRID_X_KEEP_ON_BOARD,
+        ADDR_PIXEL_TO_GRID_Y_KEEP_ON_BOARD, ADDR_UPDATE, AddZombieInRowWrapper,
+        LawnLoadGameWrapper, LawnSaveGameWrapper, ORIGINAL_ADDCOIN, ORIGINAL_CONSTRUCTOR,
+        ORIGINAL_DESTRUCTOR, ORIGINAL_DRAW, ORIGINAL_INIT_LEVEL, ORIGINAL_KEYDOWN,
+        ORIGINAL_MOUSE_DOWN, ORIGINAL_MOUSE_UP, ORIGINAL_UPDATE,
     },
-    mods::callback::{POST, PRE, callback, callback_data},
+    mods::callback::{POST, PRE, callback},
     pvz::{
         board::board::Board,
         coin::Coin,
@@ -68,48 +67,22 @@ pub extern "stdcall" fn InitLevel(this: *mut Board) {
     ORIGINAL_INIT_LEVEL.wait()(this);
 }
 
-#[repr(C)]
-pub struct ArgsAddCoin {
+/// 在游戏中生成掉落物的函数
+pub extern "thiscall" fn AddCoin(
+    this: *mut Board,
     pos: Vec2<i32>,
     theCoinType: u32,
     theCoinMotion: u32,
-}
-
-impl LuaUserData for ArgsAddCoin {
-    fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetPos", |_, this, ()| Ok(this.pos));
-
-        methods.add_method_mut("SetPos", |_, this, pos| Ok(this.pos = pos));
-
-        methods.add_method("GetCoinType", |_, this, ()| Ok(this.theCoinType));
-
-        methods.add_method_mut("SetCoinType", |_, this, coin_type| {
-            Ok(this.theCoinType = coin_type)
-        });
-
-        methods.add_method("GetCoinMotion", |_, this, ()| Ok(this.theCoinMotion));
-
-        methods.add_method_mut("SetCoinMotion", |_, this, coin_motion| {
-            Ok(this.theCoinMotion = coin_motion)
-        });
-    }
-}
-
-/// 在游戏中生成掉落物的函数
-pub extern "thiscall" fn AddCoin(this: *mut Board, args: ArgsAddCoin) -> *mut Coin {
-    let mut args = args;
-
-    callback_data(PRE | ADDR_ADDCOIN, &mut args);
+) -> *mut Coin {
     trace!(
         "产生掉落物 {} at {:?} with motion {}",
-        args.theCoinType, args.pos, args.theCoinMotion
+        theCoinType, pos, theCoinMotion
     );
 
-    let coin = ORIGINAL_ADDCOIN.wait()(this, args.pos, args.theCoinType, args.theCoinMotion);
+    let coin = ORIGINAL_ADDCOIN.wait()(this, pos, theCoinType, theCoinMotion);
 
     coin
 }
-add_callback!("AT_NEW_COIN", PRE | ADDR_ADDCOIN);
 
 /// `Board::KeyDown` 的 hook 函数
 pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: i32) {
@@ -121,33 +94,19 @@ pub extern "thiscall" fn KeyDown(this: *mut Board, keycode: i32) {
 }
 add_callback!("AT_BOARD_KEY_DOWN", PRE | ADDR_KEYDOWN);
 
-#[repr(C)]
-pub struct ArgsAddZombieInRow {
+pub extern "stdcall" fn AddZombieInRow(
     theZombieType: i32,
     theFromWave: i32,
     this: *mut Board,
     theRow: i32,
-}
-
-impl LuaUserData for ArgsAddZombieInRow {
-    fn add_fields<F: LuaUserDataFields<Self>>(fields: &mut F) {
-        add_field_mut!(fields, "row", theRow);
-        add_field_mut!(fields, "zombie_type", theZombieType);
-        add_field_mut!(fields, "from_wave", theFromWave);
-    }
-}
-
-pub extern "stdcall" fn AddZombieInRow(args: ArgsAddZombieInRow) -> *mut Zombie {
-    let mut args = args;
-    callback_data(PRE | ADDR_ADD_ZOMBIE_IN_ROW, &mut args);
+) -> *mut Zombie {
     trace!(
         "在第 {} 波 行 {} 生成僵尸 类型 {}",
-        args.theFromWave, args.theRow, args.theZombieType
+        theFromWave, theRow, theZombieType
     );
 
-    AddZombieInRowWrapper(args.this, args.theZombieType, args.theRow, args.theFromWave)
+    AddZombieInRowWrapper(this, theZombieType, theRow, theFromWave)
 }
-add_callback!("AT_NEW_ZOMBIE", PRE | ADDR_ADD_ZOMBIE_IN_ROW);
 
 /// 关卡内鼠标点击
 pub extern "thiscall" fn MouseDown(this: *mut Board, pos: Vec2<i32>, theClickCount: i32) {

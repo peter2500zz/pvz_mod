@@ -5,7 +5,7 @@ use mlua::prelude::*;
 use crate::{
     mods::LuaRegistration,
     pvz::{
-        board::{AddCoin, AddZombieInRow, ArgsAddCoin, ArgsAddZombieInRow, PixelToGridKeepOnBoard},
+        board::{AddCoin, AddZombieInRow, PixelToGridKeepOnBoard},
         lawn_app::lawn_app::get_lawn_app,
         zombie::zombie::Zombie,
     },
@@ -53,9 +53,7 @@ const _: () = assert!(size_of::<Board>() == 0x57B0);
 
 impl Clone for Board {
     fn clone(&self) -> Self {
-        unsafe {
-            ptr::read(self as *const Self as *mut Self)
-        }
+        unsafe { ptr::read(self as *const Self as *mut Self) }
     }
 }
 
@@ -95,7 +93,9 @@ pub fn with_board<T>(f: impl FnOnce(&mut Board) -> LuaResult<T>) -> LuaResult<T>
 impl LuaUserData for Board {
     fn add_methods<M: LuaUserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetUpdateDelta", |_, _, ()| {
-            Ok(get_delta_mgr().get_delta("Board::Update").unwrap_or_default())
+            Ok(get_delta_mgr()
+                .get_delta("Board::Update")
+                .unwrap_or_default())
         });
 
         methods.add_method("MousePressing", |_, _, ()| {
@@ -132,12 +132,7 @@ impl LuaUserData for Board {
 
         methods.add_method("AddZombie", |_, _, (zombie_type, row, from_wave)| {
             with_board(|board| {
-                let zombie = AddZombieInRow(ArgsAddZombieInRow {
-                    theZombieType: zombie_type,
-                    theFromWave: from_wave,
-                    this: board,
-                    theRow: row,
-                });
+                let zombie = AddZombieInRow(zombie_type, from_wave, board, row);
 
                 unsafe { Ok(ptr::read(zombie)) }
             })
@@ -145,23 +140,14 @@ impl LuaUserData for Board {
 
         methods.add_method("AddCoin", |_, _, (pos, theCoinType, theCoinMotion)| {
             with_board(|board| {
-                let coin = AddCoin(
-                    board,
-                    ArgsAddCoin {
-                        pos,
-                        theCoinType: theCoinType,
-                        theCoinMotion: theCoinMotion,
-                    },
-                );
+                let coin = AddCoin(board, pos, theCoinType, theCoinMotion);
 
                 unsafe { Ok(ptr::read(coin)) }
             })
         });
 
         methods.add_method("PosToGridKeepOnBoard", |_, _, pos| {
-            with_board(|board| {
-                Ok(PixelToGridKeepOnBoard(board, pos))
-            })
+            with_board(|board| Ok(PixelToGridKeepOnBoard(board, pos)))
         });
     }
 }

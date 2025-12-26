@@ -8,8 +8,8 @@
 
     参数:
 
-    - `mousecode` [MouseCode](...): 按下的鼠标点击代码
-    - `pos` [Vec2](...): 鼠标点击的坐标
+    - `mousecode` [MouseCode](../alias/MouseCode.md): 按下的鼠标点击代码
+    - `pos` [Vec2](../class/Vec2.md): 鼠标点击的坐标
 
     返回值:
 

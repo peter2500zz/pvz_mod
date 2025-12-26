@@ -70,20 +70,17 @@ nav:
         - AT_BOARD_MOUSE_DOWN: api/callback/AT_BOARD_MOUSE_DOWN.md
         - AT_BOARD_MOUSE_UP: api/callback/AT_BOARD_MOUSE_UP.md
       - 更新:
-        - AT_BOARD_UPDATE: ...
+        - AT_BOARD_UPDATE: api/callback/AT_BOARD_UPDATE.md
       - 游戏元素:
         - 僵尸:
-          - AT_NEW_ZOMBIE: ...
-          - AT_ZOMBIE_INIT: ...
-          - AT_ZOMBIE_DIE: ...
-        - 掉落物:
-          - AT_NEW_COIN: ...
+          - AT_ZOMBIE_INIT: api/callback/AT_ZOMBIE_INIT.md
+          - AT_ZOMBIE_DIE: api/callback/AT_ZOMBIE_DIE.md
     - 类:
       - 类: api/class/index.md
       - Mod: api/class/Mod.md
       - Log: api/class/Log.md
       - 渲染:
-        - Graphics: ...
+        - Graphics: api/class/Graphics.md
         - Color: api/class/Color.md
       - 数据结构:
         - Vec2: api/class/Vec2.md
@@ -97,9 +94,10 @@ nav:
     - 枚举:
       - 枚举: api/enum/index.md
       - 渲染:
-        - RenderLayers: ...
+        - RenderLayers: api/enum/RenderLayers.md
       - 键鼠输入:
         - KeyCodes: api/enum/KeyCodes.md
+        - MouseCodes: api/enum/MouseCodes.md
       - 游戏元素:
         - 掉落物:
           - CoinTypes: api/enum/CoinTypes.md

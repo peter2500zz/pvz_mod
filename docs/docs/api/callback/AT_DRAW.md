@@ -8,7 +8,7 @@
 
     参数:
 
-    - `g` [Graphics](...): 图形类
+    - `g` [Graphics](../class/Graphics.md): 图形类
 
 在游戏渲染的每一帧，此回调会被触发。
 
